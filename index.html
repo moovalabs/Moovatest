@@ -400,137 +400,387 @@
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-// ANIMAL KNOWLEDGE BASE
-// Each animal has traits the bot uses to narrow down.
+// MASSIVE ANIMAL KNOWLEDGE BASE - 150+ animals
+// Traits: each animal has boolean traits for filtering
 // ═══════════════════════════════════════════════════════════════
+
+// Trait key legend:
+// mammal, bird, reptile, amphibian, fish, insect, arachnid, crustacean, mollusk
+// pet, farm, wild, predator, herbivore
+// water, flies, underground
+// legs0, legs2, legs4, legs6, legs8, legsMany
+// fur, feathers, scales, shell, spines
+// large, tiny (tiny = smaller than a fist)
+// fast, slow, venomous, nocturnal
+// africa, asia, northAmerica, southAmerica, europe, australia, arctic, worldwide
+// climbs, swims, burrows, jumps
+// stripes, spots, horns, antlers, trunk, pouch, longneck, longTail, tusks
+// domestic, social, solitary
+// coldblood, warmblooded
+// canFly (actual flight, not just wings)
+// ocean, freshwater
+// migration, hibernate
+// makes_web, changes_color, electric, bioluminescent, echolocation
+
 const animalDB = [
-    // Mammals - pets
-    { name: "katt", emoji: "🐱", traits: { daggdjur: true, husdjur: true, rovdjur: true, stort: false, vatten: false, flyger: false, ben4: true, pals: true, horn: false, gnagare: false, klattrar: true, afrika: false, snabbt: false, giftig: false, nattaktiv: true, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: false, tropisk: false, nordisk: false, spikar: false } },
-    { name: "hund", emoji: "🐶", traits: { daggdjur: true, husdjur: true, rovdjur: true, stort: false, vatten: false, flyger: false, ben4: true, pals: true, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: true, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: false, tropisk: false, nordisk: false, spikar: false } },
-    { name: "hamster", emoji: "🐹", traits: { daggdjur: true, husdjur: true, rovdjur: false, stort: false, vatten: false, flyger: false, ben4: true, pals: true, horn: false, gnagare: true, klattrar: false, afrika: false, snabbt: false, giftig: false, nattaktiv: true, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: false, tropisk: false, nordisk: false, spikar: false } },
-    { name: "kanin", emoji: "🐰", traits: { daggdjur: true, husdjur: true, rovdjur: false, stort: false, vatten: false, flyger: false, ben4: true, pals: true, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: true, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: false, tropisk: false, nordisk: false, spikar: false } },
-    { name: "marsvin", emoji: "🐹", traits: { daggdjur: true, husdjur: true, rovdjur: false, stort: false, vatten: false, flyger: false, ben4: true, pals: true, horn: false, gnagare: true, klattrar: false, afrika: false, snabbt: false, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: false, tropisk: false, nordisk: false, spikar: false } },
+    // ══════════ MAMMALS - Pets ══════════
+    { name: "katt", emoji: "🐱", t: "mammal pet predator legs4 fur small warmblooded domestic nocturnal climbs solitary worldwide" },
+    { name: "hund", emoji: "🐶", t: "mammal pet predator legs4 fur small warmblooded domestic social fast worldwide" },
+    { name: "hamster", emoji: "🐹", t: "mammal pet legs4 fur tiny warmblooded domestic nocturnal herbivore solitary burrows" },
+    { name: "kanin", emoji: "🐰", t: "mammal pet legs4 fur small warmblooded domestic herbivore social jumps" },
+    { name: "marsvin", emoji: "🐹", t: "mammal pet legs4 fur small warmblooded domestic herbivore social" },
+    { name: "iller", emoji: "🦨", t: "mammal pet predator legs4 fur small warmblooded domestic nocturnal" },
+    { name: "chinchilla", emoji: "🐭", t: "mammal pet legs4 fur small warmblooded domestic nocturnal herbivore southAmerica" },
 
-    // Farm animals
-    { name: "hast", emoji: "🐴", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: true, vatten: false, flyger: false, ben4: true, pals: true, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: true, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: true, vild: false, tropisk: false, nordisk: false, spikar: true } },
-    { name: "ko", emoji: "🐄", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: true, vatten: false, flyger: false, ben4: true, pals: true, horn: true, gnagare: false, klattrar: false, afrika: false, snabbt: false, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: true, vild: false, tropisk: false, nordisk: false, spikar: true } },
-    { name: "gris", emoji: "🐷", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: false, vatten: false, flyger: false, ben4: true, pals: false, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: false, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: true, vild: false, tropisk: false, nordisk: false, spikar: true } },
-    { name: "far", emoji: "🐑", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: false, vatten: false, flyger: false, ben4: true, pals: true, horn: true, gnagare: false, klattrar: false, afrika: false, snabbt: false, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: true, vild: false, tropisk: false, nordisk: false, spikar: true } },
-    { name: "get", emoji: "🐐", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: false, vatten: false, flyger: false, ben4: true, pals: true, horn: true, gnagare: false, klattrar: true, afrika: false, snabbt: false, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: true, vild: false, tropisk: false, nordisk: false, spikar: true } },
-    { name: "hona", emoji: "🐔", traits: { daggdjur: false, husdjur: false, rovdjur: false, stort: false, vatten: false, flyger: false, ben4: false, pals: false, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: false, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: true, fisk: false, bondgard: true, vild: false, tropisk: false, nordisk: false, spikar: false } },
+    // ══════════ MAMMALS - Farm ══════════
+    { name: "hast", emoji: "🐴", t: "mammal farm legs4 fur large warmblooded domestic herbivore social fast hooves" },
+    { name: "ko", emoji: "🐄", t: "mammal farm legs4 fur large warmblooded domestic herbivore social horns hooves" },
+    { name: "gris", emoji: "🐷", t: "mammal farm legs4 large warmblooded domestic social hooves" },
+    { name: "far", emoji: "🐑", t: "mammal farm legs4 fur large warmblooded domestic herbivore social horns hooves" },
+    { name: "get", emoji: "🐐", t: "mammal farm legs4 fur small warmblooded domestic herbivore social horns hooves climbs" },
+    { name: "asna", emoji: "🫏", t: "mammal farm legs4 fur large warmblooded domestic herbivore social hooves" },
 
-    // Wild - Africa / savannah
-    { name: "lejon", emoji: "🦁", traits: { daggdjur: true, husdjur: false, rovdjur: true, stort: true, vatten: false, flyger: false, ben4: true, pals: true, horn: false, gnagare: false, klattrar: false, afrika: true, snabbt: true, giftig: false, nattaktiv: true, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: false, spikar: false } },
-    { name: "elefant", emoji: "🐘", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: true, vatten: false, flyger: false, ben4: true, pals: false, horn: false, gnagare: false, klattrar: false, afrika: true, snabbt: false, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: false, spikar: false } },
-    { name: "giraff", emoji: "🦒", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: true, vatten: false, flyger: false, ben4: true, pals: true, horn: true, gnagare: false, klattrar: false, afrika: true, snabbt: true, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: false, spikar: true } },
-    { name: "zebra", emoji: "🦓", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: true, vatten: false, flyger: false, ben4: true, pals: true, horn: false, gnagare: false, klattrar: false, afrika: true, snabbt: true, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: false, spikar: true } },
-    { name: "noshörning", emoji: "🦏", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: true, vatten: false, flyger: false, ben4: true, pals: false, horn: true, gnagare: false, klattrar: false, afrika: true, snabbt: true, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: false, spikar: false } },
-    { name: "flodhast", emoji: "🦛", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: true, vatten: true, flyger: false, ben4: true, pals: false, horn: false, gnagare: false, klattrar: false, afrika: true, snabbt: false, giftig: false, nattaktiv: true, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: false, spikar: false } },
-    { name: "gepard", emoji: "🐆", traits: { daggdjur: true, husdjur: false, rovdjur: true, stort: true, vatten: false, flyger: false, ben4: true, pals: true, horn: false, gnagare: false, klattrar: false, afrika: true, snabbt: true, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: false, spikar: false } },
-    { name: "gorilla", emoji: "🦍", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: true, vatten: false, flyger: false, ben4: false, pals: true, horn: false, gnagare: false, klattrar: true, afrika: true, snabbt: false, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: true, nordisk: false, spikar: false } },
+    // ══════════ MAMMALS - Nordic wild ══════════
+    { name: "alg", emoji: "🫎", t: "mammal wild legs4 fur large warmblooded herbivore solitary antlers hooves europe fast swims" },
+    { name: "varg", emoji: "🐺", t: "mammal wild predator legs4 fur large warmblooded social nocturnal europe fast" },
+    { name: "rav", emoji: "🦊", t: "mammal wild predator legs4 fur small warmblooded nocturnal europe solitary" },
+    { name: "bjorn", emoji: "🐻", t: "mammal wild predator legs4 fur large warmblooded europe climbs fast hibernate solitary" },
+    { name: "lodjur", emoji: "🐱", t: "mammal wild predator legs4 fur large warmblooded nocturnal europe solitary climbs" },
+    { name: "igelkott", emoji: "🦔", t: "mammal wild legs4 spines small warmblooded nocturnal europe solitary hibernate" },
+    { name: "ekorre", emoji: "🐿️", t: "mammal wild legs4 fur small warmblooded herbivore europe climbs fast" },
+    { name: "hare", emoji: "🐇", t: "mammal wild legs4 fur small warmblooded herbivore nocturnal europe fast jumps" },
+    { name: "baver", emoji: "🦫", t: "mammal wild legs4 fur small warmblooded herbivore europe swims freshwater nocturnal" },
+    { name: "utter", emoji: "🦦", t: "mammal wild predator legs4 fur small warmblooded europe swims freshwater social" },
+    { name: "gravling", emoji: "🦡", t: "mammal wild predator legs4 fur small warmblooded nocturnal europe burrows solitary" },
+    { name: "ren", emoji: "🦌", t: "mammal wild legs4 fur large warmblooded herbivore social antlers hooves arctic europe migration" },
+    { name: "kronhjort", emoji: "🦌", t: "mammal wild legs4 fur large warmblooded herbivore europe antlers hooves" },
+    { name: "radjur", emoji: "🦌", t: "mammal wild legs4 fur small warmblooded herbivore europe antlers hooves" },
+    { name: "vildsvin", emoji: "🐗", t: "mammal wild legs4 fur large warmblooded europe nocturnal hooves tusks" },
+    { name: "mink", emoji: "🦦", t: "mammal wild predator legs4 fur small warmblooded europe swims nocturnal solitary" },
+    { name: "hermelin", emoji: "🐭", t: "mammal wild predator legs4 fur tiny warmblooded europe" },
+    { name: "mullvad", emoji: "🐀", t: "mammal wild legs4 fur tiny warmblooded europe burrows underground solitary" },
+    { name: "fladdermoss", emoji: "🦇", t: "mammal wild fur small warmblooded nocturnal europe canFly flies echolocation social" },
+    { name: "lemmel", emoji: "🐭", t: "mammal wild legs4 fur tiny warmblooded herbivore arctic europe social" },
 
-    // Wild - Nordic
-    { name: "alg", emoji: "🫎", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: true, vatten: false, flyger: false, ben4: true, pals: true, horn: true, gnagare: false, klattrar: false, afrika: false, snabbt: true, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: true, spikar: true } },
-    { name: "varg", emoji: "🐺", traits: { daggdjur: true, husdjur: false, rovdjur: true, stort: true, vatten: false, flyger: false, ben4: true, pals: true, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: true, giftig: false, nattaktiv: true, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: true, spikar: false } },
-    { name: "rav", emoji: "🦊", traits: { daggdjur: true, husdjur: false, rovdjur: true, stort: false, vatten: false, flyger: false, ben4: true, pals: true, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: true, giftig: false, nattaktiv: true, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: true, spikar: false } },
-    { name: "bjorn", emoji: "🐻", traits: { daggdjur: true, husdjur: false, rovdjur: true, stort: true, vatten: false, flyger: false, ben4: true, pals: true, horn: false, gnagare: false, klattrar: true, afrika: false, snabbt: true, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: true, spikar: false } },
-    { name: "isbjorn", emoji: "🐻‍❄️", traits: { daggdjur: true, husdjur: false, rovdjur: true, stort: true, vatten: true, flyger: false, ben4: true, pals: true, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: true, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: true, spikar: false } },
-    { name: "igelkott", emoji: "🦔", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: false, vatten: false, flyger: false, ben4: true, pals: false, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: false, giftig: false, nattaktiv: true, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: true, spikar: true } },
-    { name: "ekorre", emoji: "🐿️", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: false, vatten: false, flyger: false, ben4: true, pals: true, horn: false, gnagare: true, klattrar: true, afrika: false, snabbt: true, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: true, spikar: false } },
-    { name: "hare", emoji: "🐇", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: false, vatten: false, flyger: false, ben4: true, pals: true, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: true, giftig: false, nattaktiv: true, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: true, spikar: false } },
+    // ══════════ MAMMALS - African ══════════
+    { name: "lejon", emoji: "🦁", t: "mammal wild predator legs4 fur large warmblooded africa social fast" },
+    { name: "elefant", emoji: "🐘", t: "mammal wild legs4 large warmblooded herbivore africa social trunk tusks slow" },
+    { name: "giraff", emoji: "🦒", t: "mammal wild legs4 fur large warmblooded herbivore africa social longneck hooves spots" },
+    { name: "zebra", emoji: "🦓", t: "mammal wild legs4 fur large warmblooded herbivore africa social fast hooves stripes" },
+    { name: "noshorning", emoji: "🦏", t: "mammal wild legs4 large warmblooded herbivore africa solitary horns hooves" },
+    { name: "flodhast", emoji: "🦛", t: "mammal wild legs4 large warmblooded herbivore africa social swims freshwater" },
+    { name: "gepard", emoji: "🐆", t: "mammal wild predator legs4 fur large warmblooded africa fast solitary spots" },
+    { name: "leopard", emoji: "🐆", t: "mammal wild predator legs4 fur large warmblooded africa asia nocturnal solitary climbs spots" },
+    { name: "hyena", emoji: "🐕", t: "mammal wild predator legs4 fur large warmblooded africa nocturnal social" },
+    { name: "gnu", emoji: "🐃", t: "mammal wild legs4 fur large warmblooded herbivore africa social horns hooves migration" },
+    { name: "antilop", emoji: "🦌", t: "mammal wild legs4 fur large warmblooded herbivore africa social fast horns hooves" },
+    { name: "gasell", emoji: "🦌", t: "mammal wild legs4 fur small warmblooded herbivore africa social fast horns hooves jumps" },
+    { name: "gorilla", emoji: "🦍", t: "mammal wild legs4 fur large warmblooded herbivore africa social climbs" },
+    { name: "schimpans", emoji: "🐒", t: "mammal wild legs4 fur small warmblooded africa social climbs" },
+    { name: "surikat", emoji: "🐿️", t: "mammal wild legs4 fur tiny warmblooded africa social burrows" },
+    { name: "vartsvamp", emoji: "🐗", t: "mammal wild legs4 fur small warmblooded africa tusks" },
+    { name: "fennek", emoji: "🦊", t: "mammal wild predator legs4 fur tiny warmblooded africa nocturnal solitary" },
+    { name: "okapi", emoji: "🦒", t: "mammal wild legs4 fur large warmblooded herbivore africa solitary stripes" },
 
-    // Water animals
-    { name: "delfin", emoji: "🐬", traits: { daggdjur: true, husdjur: false, rovdjur: true, stort: true, vatten: true, flyger: false, ben4: false, pals: false, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: true, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: false, spikar: false } },
-    { name: "val", emoji: "🐋", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: true, vatten: true, flyger: false, ben4: false, pals: false, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: false, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: false, spikar: false } },
-    { name: "haj", emoji: "🦈", traits: { daggdjur: false, husdjur: false, rovdjur: true, stort: true, vatten: true, flyger: false, ben4: false, pals: false, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: true, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: true, bondgard: false, vild: true, tropisk: false, nordisk: false, spikar: false } },
-    { name: "blackfisk", emoji: "🐙", traits: { daggdjur: false, husdjur: false, rovdjur: true, stort: false, vatten: true, flyger: false, ben4: false, pals: false, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: false, giftig: true, nattaktiv: true, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: false, spikar: false } },
-    { name: "saldpadda", emoji: "🐢", traits: { daggdjur: false, husdjur: false, rovdjur: false, stort: false, vatten: true, flyger: false, ben4: true, pals: false, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: false, giftig: false, nattaktiv: false, insekt: false, reptil: true, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: true, nordisk: false, spikar: false } },
-    { name: "sal", emoji: "🦭", traits: { daggdjur: true, husdjur: false, rovdjur: true, stort: true, vatten: true, flyger: false, ben4: false, pals: true, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: false, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: true, spikar: false } },
-    { name: "guldfisk", emoji: "🐟", traits: { daggdjur: false, husdjur: true, rovdjur: false, stort: false, vatten: true, flyger: false, ben4: false, pals: false, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: false, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: true, bondgard: false, vild: false, tropisk: false, nordisk: false, spikar: false } },
-    { name: "krabba", emoji: "🦀", traits: { daggdjur: false, husdjur: false, rovdjur: false, stort: false, vatten: true, flyger: false, ben4: false, pals: false, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: false, giftig: false, nattaktiv: true, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: false, spikar: false } },
-    { name: "manet", emoji: "🪼", traits: { daggdjur: false, husdjur: false, rovdjur: false, stort: false, vatten: true, flyger: false, ben4: false, pals: false, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: false, giftig: true, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: false, spikar: false } },
+    // ══════════ MAMMALS - Asian ══════════
+    { name: "tiger", emoji: "🐯", t: "mammal wild predator legs4 fur large warmblooded asia nocturnal solitary swims stripes fast" },
+    { name: "panda", emoji: "🐼", t: "mammal wild legs4 fur large warmblooded herbivore asia solitary climbs" },
+    { name: "snoleopard", emoji: "🐆", t: "mammal wild predator legs4 fur large warmblooded asia solitary climbs longTail spots" },
+    { name: "orangutang", emoji: "🦧", t: "mammal wild legs4 fur large warmblooded herbivore asia solitary climbs" },
+    { name: "tapir", emoji: "🐗", t: "mammal wild legs4 fur large warmblooded herbivore asia southAmerica nocturnal solitary swims" },
+    { name: "jak", emoji: "🐃", t: "mammal wild legs4 fur large warmblooded herbivore asia social horns hooves" },
+    { name: "rottpanda", emoji: "🐼", t: "mammal wild legs4 fur small warmblooded herbivore asia solitary climbs nocturnal longTail" },
 
-    // Reptiles
-    { name: "orm", emoji: "🐍", traits: { daggdjur: false, husdjur: false, rovdjur: true, stort: false, vatten: false, flyger: false, ben4: false, pals: false, horn: false, gnagare: false, klattrar: true, afrika: false, snabbt: true, giftig: true, nattaktiv: true, insekt: false, reptil: true, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: false, spikar: false } },
-    { name: "krokodil", emoji: "🐊", traits: { daggdjur: false, husdjur: false, rovdjur: true, stort: true, vatten: true, flyger: false, ben4: true, pals: false, horn: false, gnagare: false, klattrar: false, afrika: true, snabbt: true, giftig: false, nattaktiv: true, insekt: false, reptil: true, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: true, nordisk: false, spikar: false } },
-    { name: "kameleont", emoji: "🦎", traits: { daggdjur: false, husdjur: false, rovdjur: false, stort: false, vatten: false, flyger: false, ben4: true, pals: false, horn: false, gnagare: false, klattrar: true, afrika: true, snabbt: false, giftig: false, nattaktiv: false, insekt: false, reptil: true, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: true, nordisk: false, spikar: false } },
-    { name: "groda", emoji: "🐸", traits: { daggdjur: false, husdjur: false, rovdjur: false, stort: false, vatten: true, flyger: false, ben4: true, pals: false, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: false, giftig: false, nattaktiv: true, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: true, spikar: false } },
+    // ══════════ MAMMALS - Americas ══════════
+    { name: "bison", emoji: "🦬", t: "mammal wild legs4 fur large warmblooded herbivore northAmerica social horns hooves" },
+    { name: "grizzlybjorn", emoji: "🐻", t: "mammal wild predator legs4 fur large warmblooded northAmerica solitary climbs fast hibernate" },
+    { name: "tvattbjorn", emoji: "🦝", t: "mammal wild legs4 fur small warmblooded northAmerica nocturnal climbs solitary" },
+    { name: "skunk", emoji: "🦨", t: "mammal wild legs4 fur small warmblooded northAmerica nocturnal solitary" },
+    { name: "prairiehund", emoji: "🐿️", t: "mammal wild legs4 fur small warmblooded herbivore northAmerica social burrows" },
+    { name: "jaguar", emoji: "🐆", t: "mammal wild predator legs4 fur large warmblooded southAmerica nocturnal solitary swims climbs spots" },
+    { name: "sengangare", emoji: "🦥", t: "mammal wild legs4 fur small warmblooded herbivore southAmerica solitary climbs slow" },
+    { name: "kapybara", emoji: "🐹", t: "mammal wild legs4 fur large warmblooded herbivore southAmerica social swims freshwater" },
+    { name: "bältdjur", emoji: "🐾", t: "mammal wild legs4 shell small warmblooded southAmerica nocturnal solitary burrows" },
+    { name: "myrsläkting", emoji: "🐾", t: "mammal wild legs4 fur large warmblooded southAmerica solitary" },
+    { name: "lama", emoji: "🦙", t: "mammal farm legs4 fur large warmblooded herbivore southAmerica social hooves" },
+    { name: "alpaka", emoji: "🦙", t: "mammal farm legs4 fur small warmblooded herbivore southAmerica social hooves" },
 
-    // Birds
-    { name: "uggla", emoji: "🦉", traits: { daggdjur: false, husdjur: false, rovdjur: true, stort: false, vatten: false, flyger: true, ben4: false, pals: false, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: false, giftig: false, nattaktiv: true, insekt: false, reptil: false, fagel: true, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: true, spikar: false } },
-    { name: "orn", emoji: "🦅", traits: { daggdjur: false, husdjur: false, rovdjur: true, stort: true, vatten: false, flyger: true, ben4: false, pals: false, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: true, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: true, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: true, spikar: false } },
-    { name: "papegoja", emoji: "🦜", traits: { daggdjur: false, husdjur: true, rovdjur: false, stort: false, vatten: false, flyger: true, ben4: false, pals: false, horn: false, gnagare: false, klattrar: true, afrika: false, snabbt: false, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: true, fisk: false, bondgard: false, vild: false, tropisk: true, nordisk: false, spikar: false } },
-    { name: "pingvin", emoji: "🐧", traits: { daggdjur: false, husdjur: false, rovdjur: false, stort: false, vatten: true, flyger: false, ben4: false, pals: false, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: false, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: true, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: false, spikar: false } },
-    { name: "flamingo", emoji: "🦩", traits: { daggdjur: false, husdjur: false, rovdjur: false, stort: true, vatten: true, flyger: true, ben4: false, pals: false, horn: false, gnagare: false, klattrar: false, afrika: true, snabbt: false, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: true, fisk: false, bondgard: false, vild: true, tropisk: true, nordisk: false, spikar: false } },
-    { name: "stork", emoji: "🪿", traits: { daggdjur: false, husdjur: false, rovdjur: false, stort: true, vatten: false, flyger: true, ben4: false, pals: false, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: false, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: true, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: true, spikar: false } },
+    // ══════════ MAMMALS - Australia ══════════
+    { name: "kanguru", emoji: "🦘", t: "mammal wild legs4 fur large warmblooded herbivore australia social jumps pouch fast" },
+    { name: "koala", emoji: "🐨", t: "mammal wild legs4 fur small warmblooded herbivore australia solitary climbs nocturnal pouch slow" },
+    { name: "vombat", emoji: "🐻", t: "mammal wild legs4 fur small warmblooded herbivore australia nocturnal burrows pouch" },
+    { name: "nasbborrsdjur", emoji: "🐾", t: "mammal wild legs4 spines small warmblooded australia solitary" },
+    { name: "tasmanisk djävul", emoji: "🐾", t: "mammal wild predator legs4 fur small warmblooded australia nocturnal solitary pouch" },
+    { name: "platypus", emoji: "🐾", t: "mammal wild legs4 fur small warmblooded australia swims freshwater solitary venomous" },
+    { name: "dingo", emoji: "🐕", t: "mammal wild predator legs4 fur large warmblooded australia social" },
 
-    // Insects & small
-    { name: "fjäril", emoji: "🦋", traits: { daggdjur: false, husdjur: false, rovdjur: false, stort: false, vatten: false, flyger: true, ben4: false, pals: false, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: false, giftig: false, nattaktiv: false, insekt: true, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: false, spikar: false } },
-    { name: "bi", emoji: "🐝", traits: { daggdjur: false, husdjur: false, rovdjur: false, stort: false, vatten: false, flyger: true, ben4: false, pals: false, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: false, giftig: true, nattaktiv: false, insekt: true, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: false, spikar: false } },
-    { name: "spindel", emoji: "🕷️", traits: { daggdjur: false, husdjur: false, rovdjur: true, stort: false, vatten: false, flyger: false, ben4: false, pals: false, horn: false, gnagare: false, klattrar: true, afrika: false, snabbt: false, giftig: true, nattaktiv: true, insekt: true, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: false, spikar: false } },
-    { name: "myra", emoji: "🐜", traits: { daggdjur: false, husdjur: false, rovdjur: false, stort: false, vatten: false, flyger: false, ben4: false, pals: false, horn: false, gnagare: false, klattrar: true, afrika: false, snabbt: false, giftig: false, nattaktiv: false, insekt: true, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: false, spikar: false } },
-    { name: "nyckelpiga", emoji: "🐞", traits: { daggdjur: false, husdjur: false, rovdjur: false, stort: false, vatten: false, flyger: true, ben4: false, pals: false, horn: false, gnagare: false, klattrar: true, afrika: false, snabbt: false, giftig: false, nattaktiv: false, insekt: true, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: true, spikar: false } },
-    { name: "skorpion", emoji: "🦂", traits: { daggdjur: false, husdjur: false, rovdjur: true, stort: false, vatten: false, flyger: false, ben4: false, pals: false, horn: false, gnagare: false, klattrar: false, afrika: true, snabbt: false, giftig: true, nattaktiv: true, insekt: true, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: true, nordisk: false, spikar: false } },
+    // ══════════ MAMMALS - Marine ══════════
+    { name: "delfin", emoji: "🐬", t: "mammal wild predator large warmblooded social fast swims ocean legs0 echolocation worldwide" },
+    { name: "val", emoji: "🐋", t: "mammal wild large warmblooded social swims ocean legs0 slow migration worldwide" },
+    { name: "spakval", emoji: "🐋", t: "mammal wild predator large warmblooded social fast swims ocean legs0 echolocation" },
+    { name: "narvhal", emoji: "🐋", t: "mammal wild large warmblooded social swims ocean legs0 tusks arctic" },
+    { name: "sal", emoji: "🦭", t: "mammal wild predator large warmblooded social swims ocean legs0 fur arctic" },
+    { name: "valross", emoji: "🦭", t: "mammal wild large warmblooded social swims ocean legs0 tusks arctic" },
+    { name: "sjolejon", emoji: "🦭", t: "mammal wild predator large warmblooded social swims ocean legs0 fur" },
+    { name: "manate", emoji: "🐋", t: "mammal wild large warmblooded swims ocean freshwater legs0 herbivore slow" },
 
-    // Exotic / other
-    { name: "panda", emoji: "🐼", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: true, vatten: false, flyger: false, ben4: true, pals: true, horn: false, gnagare: false, klattrar: true, afrika: false, snabbt: false, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: false, spikar: false } },
-    { name: "tiger", emoji: "🐯", traits: { daggdjur: true, husdjur: false, rovdjur: true, stort: true, vatten: true, flyger: false, ben4: true, pals: true, horn: false, gnagare: false, klattrar: true, afrika: false, snabbt: true, giftig: false, nattaktiv: true, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: true, nordisk: false, spikar: false } },
-    { name: "apa", emoji: "🐒", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: false, vatten: false, flyger: false, ben4: false, pals: true, horn: false, gnagare: false, klattrar: true, afrika: true, snabbt: true, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: true, nordisk: false, spikar: false } },
-    { name: "koala", emoji: "🐨", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: false, vatten: false, flyger: false, ben4: true, pals: true, horn: false, gnagare: false, klattrar: true, afrika: false, snabbt: false, giftig: false, nattaktiv: true, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: false, spikar: false } },
-    { name: "kanguru", emoji: "🦘", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: true, vatten: false, flyger: false, ben4: false, pals: true, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: true, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: false, spikar: false } },
-    { name: "sengangare", emoji: "🦥", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: false, vatten: false, flyger: false, ben4: true, pals: true, horn: false, gnagare: false, klattrar: true, afrika: false, snabbt: false, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: true, nordisk: false, spikar: false } },
-    { name: "fladdermoss", emoji: "🦇", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: false, vatten: false, flyger: true, ben4: false, pals: true, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: true, giftig: false, nattaktiv: true, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: true, spikar: false } },
-    { name: "kamel", emoji: "🐪", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: true, vatten: false, flyger: false, ben4: true, pals: true, horn: false, gnagare: false, klattrar: false, afrika: true, snabbt: true, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: false, spikar: true } },
-    { name: "lama", emoji: "🦙", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: true, vatten: false, flyger: false, ben4: true, pals: true, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: false, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: true, vild: false, tropisk: false, nordisk: false, spikar: true } },
-    { name: "utter", emoji: "🦦", traits: { daggdjur: true, husdjur: false, rovdjur: true, stort: false, vatten: true, flyger: false, ben4: true, pals: true, horn: false, gnagare: false, klattrar: false, afrika: false, snabbt: true, giftig: false, nattaktiv: false, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: true, spikar: false } },
-    { name: "baver", emoji: "🦫", traits: { daggdjur: true, husdjur: false, rovdjur: false, stort: false, vatten: true, flyger: false, ben4: true, pals: true, horn: false, gnagare: true, klattrar: false, afrika: false, snabbt: false, giftig: false, nattaktiv: true, insekt: false, reptil: false, fagel: false, fisk: false, bondgard: false, vild: true, tropisk: false, nordisk: true, spikar: false } },
+    // ══════════ MAMMALS - Other ══════════
+    { name: "isbjorn", emoji: "🐻‍❄️", t: "mammal wild predator legs4 fur large warmblooded arctic solitary swims fast" },
+    { name: "kamel", emoji: "🐪", t: "mammal wild legs4 fur large warmblooded herbivore africa asia domestic social hooves" },
+    { name: "jordekorre", emoji: "🐿️", t: "mammal wild legs4 fur tiny warmblooded herbivore northAmerica burrows hibernate" },
+    { name: "ratta", emoji: "🐀", t: "mammal wild legs4 fur tiny warmblooded nocturnal worldwide social" },
+    { name: "mus", emoji: "🐭", t: "mammal wild legs4 fur tiny warmblooded nocturnal worldwide social" },
+
+    // ══════════ BIRDS ══════════
+    { name: "hona", emoji: "🐔", t: "bird farm legs2 feathers small warmblooded domestic" },
+    { name: "tupp", emoji: "🐓", t: "bird farm legs2 feathers small warmblooded domestic" },
+    { name: "anka", emoji: "🦆", t: "bird wild legs2 feathers small warmblooded swims freshwater canFly herbivore social europe migration" },
+    { name: "gas", emoji: "🪿", t: "bird farm wild legs2 feathers large warmblooded swims freshwater canFly herbivore social europe migration" },
+    { name: "svan", emoji: "🦢", t: "bird wild legs2 feathers large warmblooded swims freshwater canFly herbivore social europe" },
+    { name: "uggla", emoji: "🦉", t: "bird wild predator legs2 feathers small warmblooded nocturnal europe canFly solitary" },
+    { name: "orn", emoji: "🦅", t: "bird wild predator legs2 feathers large warmblooded europe canFly fast solitary" },
+    { name: "falk", emoji: "🦅", t: "bird wild predator legs2 feathers small warmblooded europe canFly fast solitary" },
+    { name: "hok", emoji: "🦅", t: "bird wild predator legs2 feathers small warmblooded europe canFly fast solitary" },
+    { name: "papegoja", emoji: "🦜", t: "bird pet legs2 feathers small warmblooded canFly social climbs" },
+    { name: "undulat", emoji: "🦜", t: "bird pet legs2 feathers tiny warmblooded domestic canFly social australia" },
+    { name: "pingvin", emoji: "🐧", t: "bird wild legs2 feathers small warmblooded swims ocean social arctic" },
+    { name: "flamingo", emoji: "🦩", t: "bird wild legs2 feathers large warmblooded swims freshwater canFly social africa" },
+    { name: "pelikan", emoji: "🐦", t: "bird wild legs2 feathers large warmblooded swims ocean canFly social" },
+    { name: "tukan", emoji: "🐦", t: "bird wild legs2 feathers small warmblooded canFly social southAmerica" },
+    { name: "kolibri", emoji: "🐦", t: "bird wild legs2 feathers tiny warmblooded canFly fast solitary southAmerica northAmerica" },
+    { name: "struts", emoji: "🐦", t: "bird wild legs2 feathers large warmblooded fast africa herbivore social" },
+    { name: "pafagel", emoji: "🦚", t: "bird wild legs2 feathers large warmblooded asia social longTail" },
+    { name: "korp", emoji: "🐦‍⬛", t: "bird wild predator legs2 feathers small warmblooded canFly social europe" },
+    { name: "kraka", emoji: "🐦‍⬛", t: "bird wild legs2 feathers small warmblooded canFly social europe" },
+    { name: "sparv", emoji: "🐦", t: "bird wild legs2 feathers tiny warmblooded canFly social europe worldwide" },
+    { name: "duva", emoji: "🕊️", t: "bird wild legs2 feathers small warmblooded canFly social herbivore worldwide" },
+    { name: "stork", emoji: "🪿", t: "bird wild legs2 feathers large warmblooded canFly europe migration" },
+    { name: "kiwi", emoji: "🐦", t: "bird wild legs2 feathers small warmblooded nocturnal solitary" },
+    { name: "kakadua", emoji: "🦜", t: "bird pet legs2 feathers small warmblooded canFly social australia climbs" },
+    { name: "mås", emoji: "🐦", t: "bird wild legs2 feathers small warmblooded canFly social swims ocean europe worldwide" },
+    { name: "albatross", emoji: "🐦", t: "bird wild legs2 feathers large warmblooded canFly swims ocean solitary migration" },
+
+    // ══════════ REPTILES ══════════
+    { name: "orm", emoji: "🐍", t: "reptile wild predator legs0 scales small coldblood venomous solitary worldwide" },
+    { name: "pytonorm", emoji: "🐍", t: "reptile wild predator legs0 scales large coldblood solitary asia africa" },
+    { name: "kobra", emoji: "🐍", t: "reptile wild predator legs0 scales small coldblood venomous solitary asia africa" },
+    { name: "krokodil", emoji: "🐊", t: "reptile wild predator legs4 scales large coldblood swims freshwater africa asia nocturnal solitary" },
+    { name: "alligator", emoji: "🐊", t: "reptile wild predator legs4 scales large coldblood swims freshwater northAmerica nocturnal solitary" },
+    { name: "kameleont", emoji: "🦎", t: "reptile wild legs4 scales small coldblood climbs africa solitary changes_color slow" },
+    { name: "gecko", emoji: "🦎", t: "reptile wild legs4 scales tiny coldblood climbs nocturnal worldwide solitary" },
+    { name: "leguan", emoji: "🦎", t: "reptile wild legs4 scales large coldblood herbivore southAmerica solitary climbs" },
+    { name: "komodovaran", emoji: "🦎", t: "reptile wild predator legs4 scales large coldblood asia solitary venomous" },
+    { name: "havssköldpadda", emoji: "🐢", t: "reptile wild legs4 shell large coldblood swims ocean slow solitary migration" },
+    { name: "landsköldpadda", emoji: "🐢", t: "reptile wild pet legs4 shell small coldblood slow solitary herbivore" },
+    { name: "skallerorm", emoji: "🐍", t: "reptile wild predator legs0 scales small coldblood venomous solitary northAmerica nocturnal" },
+
+    // ══════════ AMPHIBIANS ══════════
+    { name: "groda", emoji: "🐸", t: "amphibian wild legs4 small coldblood swims freshwater jumps nocturnal europe worldwide" },
+    { name: "pilgiftsgroda", emoji: "🐸", t: "amphibian wild legs4 tiny coldblood venomous southAmerica" },
+    { name: "salamander", emoji: "🦎", t: "amphibian wild legs4 small coldblood swims freshwater nocturnal europe" },
+    { name: "padda", emoji: "🐸", t: "amphibian wild legs4 small coldblood nocturnal europe worldwide burrows" },
+    { name: "axolotl", emoji: "🦎", t: "amphibian wild pet legs4 small coldblood swims freshwater northAmerica" },
+
+    // ══════════ FISH ══════════
+    { name: "guldfisk", emoji: "🐟", t: "fish pet legs0 scales tiny coldblood swims freshwater domestic" },
+    { name: "haj", emoji: "🦈", t: "fish wild predator legs0 large coldblood swims ocean fast solitary worldwide" },
+    { name: "lax", emoji: "🐟", t: "fish wild legs0 scales small coldblood swims freshwater ocean fast migration worldwide" },
+    { name: "clownfisk", emoji: "🐠", t: "fish wild legs0 scales tiny coldblood swims ocean social" },
+    { name: "ål", emoji: "🐍", t: "fish wild legs0 scales small coldblood swims freshwater ocean nocturnal migration europe" },
+    { name: "rocka", emoji: "🐟", t: "fish wild legs0 large coldblood swims ocean slow" },
+    { name: "piraya", emoji: "🐟", t: "fish wild predator legs0 scales small coldblood swims freshwater social southAmerica" },
+    { name: "sjohast", emoji: "🐟", t: "fish wild legs0 tiny coldblood swims ocean slow" },
+    { name: "torsk", emoji: "🐟", t: "fish wild legs0 scales small coldblood swims ocean europe" },
+    { name: "gädda", emoji: "🐟", t: "fish wild predator legs0 scales large coldblood swims freshwater fast europe solitary" },
+    { name: "abborre", emoji: "🐟", t: "fish wild predator legs0 scales small coldblood swims freshwater europe" },
+    { name: "havskatt", emoji: "🐟", t: "fish wild predator legs0 scales small coldblood swims ocean" },
+    { name: "stör", emoji: "🐟", t: "fish wild legs0 scales large coldblood swims freshwater ocean europe slow" },
+    { name: "elektrisk al", emoji: "🐟", t: "fish wild predator legs0 large coldblood swims freshwater southAmerica electric solitary" },
+
+    // ══════════ INSECTS ══════════
+    { name: "fjäril", emoji: "🦋", t: "insect wild legs6 tiny coldblood canFly flies herbivore worldwide" },
+    { name: "bi", emoji: "🐝", t: "insect wild legs6 tiny coldblood canFly flies venomous social worldwide" },
+    { name: "geting", emoji: "🐝", t: "insect wild predator legs6 tiny coldblood canFly flies venomous social worldwide stripes" },
+    { name: "humla", emoji: "🐝", t: "insect wild legs6 tiny coldblood canFly flies venomous social europe" },
+    { name: "myra", emoji: "🐜", t: "insect wild legs6 tiny coldblood social worldwide" },
+    { name: "nyckelpiga", emoji: "🐞", t: "insect wild predator legs6 tiny coldblood canFly flies europe spots" },
+    { name: "trollslända", emoji: "🪰", t: "insect wild predator legs6 tiny coldblood canFly flies fast freshwater worldwide" },
+    { name: "eldflugor", emoji: "🐛", t: "insect wild legs6 tiny coldblood canFly flies nocturnal bioluminescent" },
+    { name: "skalbagge", emoji: "🪲", t: "insect wild legs6 tiny coldblood canFly shell worldwide" },
+    { name: "fluga", emoji: "🪰", t: "insect wild legs6 tiny coldblood canFly flies fast worldwide" },
+    { name: "mygga", emoji: "🦟", t: "insect wild legs6 tiny coldblood canFly flies nocturnal worldwide" },
+    { name: "grashopper", emoji: "🦗", t: "insect wild legs6 tiny coldblood herbivore jumps worldwide" },
+    { name: "syrsa", emoji: "🦗", t: "insect wild legs6 tiny coldblood nocturnal jumps worldwide" },
+    { name: "bönsyrsa", emoji: "🦗", t: "insect wild predator legs6 tiny coldblood worldwide" },
+    { name: "stinkfly", emoji: "🪲", t: "insect wild legs6 tiny coldblood worldwide" },
+
+    // ══════════ ARACHNIDS ══════════
+    { name: "spindel", emoji: "🕷️", t: "arachnid wild predator legs8 tiny coldblood nocturnal worldwide makes_web solitary" },
+    { name: "skorpion", emoji: "🦂", t: "arachnid wild predator legs8 small coldblood venomous nocturnal africa asia solitary" },
+    { name: "tarantel", emoji: "🕷️", t: "arachnid wild predator legs8 small coldblood nocturnal solitary southAmerica" },
+    { name: "fasting", emoji: "🕷️", t: "arachnid wild legs8 tiny coldblood europe" },
+
+    // ══════════ CRUSTACEANS ══════════
+    { name: "krabba", emoji: "🦀", t: "crustacean wild legs8 shell small coldblood swims ocean worldwide" },
+    { name: "hummer", emoji: "🦞", t: "crustacean wild legs8 shell large coldblood swims ocean nocturnal solitary" },
+    { name: "räka", emoji: "🦐", t: "crustacean wild legs8 tiny coldblood swims ocean worldwide" },
+    { name: "eremitkrabba", emoji: "🦀", t: "crustacean wild legs8 shell tiny coldblood ocean" },
+
+    // ══════════ MOLLUSKS ══════════
+    { name: "blackfisk", emoji: "🐙", t: "mollusk wild predator legs8 small coldblood swims ocean solitary changes_color" },
+    { name: "tioarmad bläckfisk", emoji: "🦑", t: "mollusk wild predator legs8 large coldblood swims ocean" },
+    { name: "snigel", emoji: "🐌", t: "mollusk wild legs0 shell tiny coldblood slow herbivore worldwide" },
+    { name: "snacka", emoji: "🐚", t: "mollusk wild legs0 shell tiny coldblood swims ocean slow" },
+    { name: "mussla", emoji: "🦪", t: "mollusk wild legs0 shell tiny coldblood swims ocean freshwater" },
+
+    // ══════════ OTHER INVERTEBRATES ══════════
+    { name: "manet", emoji: "🪼", t: "wild legs0 small coldblood swims ocean venomous worldwide" },
+    { name: "sjostjarna", emoji: "⭐", t: "wild legs0 small coldblood swims ocean slow" },
+    { name: "mask", emoji: "🪱", t: "wild legs0 tiny coldblood burrows underground worldwide" },
+    { name: "igel", emoji: "🪱", t: "wild legs0 tiny coldblood swims freshwater worldwide" },
+    { name: "korall", emoji: "🪸", t: "wild legs0 tiny coldblood ocean social" },
 ];
 
+// Parse trait strings into sets for fast lookup
+for (const a of animalDB) {
+    a.traits = new Set(a.t.split(" "));
+    delete a.t;
+}
+
 // ═══════════════════════════════════════════════════════════════
-// QUESTIONS - ordered by information gain (most divisive first)
+// QUESTIONS - comprehensive list with clear Swedish text
+// Each question tests one or more traits
 // ═══════════════════════════════════════════════════════════════
 const allQuestions = [
-    { id: "daggdjur", text: "Ar ditt djur ett daggdjur?" },
-    { id: "vatten", text: "Lever ditt djur i eller nara vatten?" },
-    { id: "stort", text: "Ar djuret storre an en katt?" },
-    { id: "ben4", text: "Har djuret fyra ben?" },
-    { id: "pals", text: "Har djuret pals eller mjuk kropp?" },
-    { id: "rovdjur", text: "Ar djuret ett rovdjur (ater det andra djur)?" },
-    { id: "flyger", text: "Kan djuret flyga?" },
-    { id: "husdjur", text: "Kan djuret vara husdjur?" },
-    { id: "vild", text: "Lever djuret i det vilda?" },
-    { id: "afrika", text: "Kan djuret leva i Afrika?" },
-    { id: "nordisk", text: "Kan djuret leva i Norden/Skandinavien?" },
-    { id: "tropisk", text: "Lever djuret i tropiska omraden?" },
-    { id: "snabbt", text: "Ar djuret snabbt?" },
-    { id: "nattaktiv", text: "Ar djuret nattaktivt?" },
-    { id: "giftig", text: "Ar djuret giftigt eller kan det stickas?" },
-    { id: "horn", text: "Har djuret horn eller annat pa huvudet?" },
-    { id: "klattrar", text: "Kan djuret klattra?" },
-    { id: "gnagare", text: "Ar djuret en gnagare?" },
-    { id: "insekt", text: "Ar djuret en insekt eller spindeldjur?" },
-    { id: "reptil", text: "Ar djuret en reptil eller amfibie?" },
-    { id: "fagel", text: "Ar djuret en fagel?" },
-    { id: "fisk", text: "Ar djuret en fisk?" },
-    { id: "bondgard", text: "Kan djuret leva pa en bondgard?" },
-    { id: "spikar", text: "Har djuret hovar eller klover?" },
+    // Top-level classification
+    { id: "q_mammal", text: "Ar ditt djur ett daggdjur?", yes: ["mammal"], no: [], excludeYes: [], excludeNo: ["mammal"] },
+    { id: "q_bird", text: "Ar ditt djur en fagel?", yes: ["bird"], no: [], excludeYes: [], excludeNo: ["bird"] },
+    { id: "q_fish", text: "Ar ditt djur en fisk?", yes: ["fish"], no: [], excludeYes: [], excludeNo: ["fish"] },
+    { id: "q_reptile", text: "Ar ditt djur en reptil?", yes: ["reptile"], no: [], excludeYes: [], excludeNo: ["reptile"] },
+    { id: "q_amphibian", text: "Ar ditt djur ett groddjur (amfibie)?", yes: ["amphibian"], no: [], excludeYes: [], excludeNo: ["amphibian"] },
+    { id: "q_insect", text: "Ar ditt djur en insekt?", yes: ["insect"], no: [], excludeYes: [], excludeNo: ["insect"] },
+    { id: "q_arachnid", text: "Ar ditt djur ett spindeldjur?", yes: ["arachnid"], no: [], excludeYes: [], excludeNo: ["arachnid"] },
+    { id: "q_crustacean", text: "Ar ditt djur ett kräftdjur (krabba, hummer etc)?", yes: ["crustacean"], no: [], excludeYes: [], excludeNo: ["crustacean"] },
+    { id: "q_mollusk", text: "Ar ditt djur en blötdjur (bläckfisk, snigel, mussla)?", yes: ["mollusk"], no: [], excludeYes: [], excludeNo: ["mollusk"] },
+
+    // Size
+    { id: "q_large", text: "Ar djuret storre an en hund?", yes: ["large"], no: [], excludeYes: [], excludeNo: ["large"] },
+    { id: "q_tiny", text: "Ar djuret mindre an en knytnäve?", yes: ["tiny"], no: [], excludeYes: [], excludeNo: ["tiny"] },
+
+    // Habitat
+    { id: "q_water", text: "Lever djuret i eller nara vatten?", yes: ["swims"], no: [], excludeYes: [], excludeNo: ["swims"] },
+    { id: "q_ocean", text: "Lever djuret i havet/salvatten?", yes: ["ocean"], no: [], excludeYes: [], excludeNo: ["ocean"] },
+    { id: "q_freshwater", text: "Lever djuret i sötvatten (sjöar, floder)?", yes: ["freshwater"], no: [], excludeYes: [], excludeNo: ["freshwater"] },
+    { id: "q_flies", text: "Kan djuret flyga?", yes: ["canFly"], no: [], excludeYes: [], excludeNo: ["canFly"] },
+    { id: "q_underground", text: "Lever djuret under jord?", yes: ["underground", "burrows"], no: [], excludeYes: [], excludeNo: ["underground"] },
+
+    // Domestication
+    { id: "q_pet", text: "Kan djuret vara ett husdjur?", yes: ["pet"], no: [], excludeYes: [], excludeNo: ["pet"] },
+    { id: "q_farm", text: "Lever djuret pa en bondgard?", yes: ["farm"], no: [], excludeYes: [], excludeNo: ["farm"] },
+    { id: "q_wild", text: "Lever djuret i det vilda?", yes: ["wild"], no: [], excludeYes: [], excludeNo: ["wild"] },
+
+    // Body features
+    { id: "q_fur", text: "Har djuret pals?", yes: ["fur"], no: [], excludeYes: [], excludeNo: ["fur"] },
+    { id: "q_feathers", text: "Har djuret fjädrar?", yes: ["feathers"], no: [], excludeYes: [], excludeNo: ["feathers"] },
+    { id: "q_scales", text: "Har djuret fjäll?", yes: ["scales"], no: [], excludeYes: [], excludeNo: ["scales"] },
+    { id: "q_shell", text: "Har djuret ett skal eller sköld?", yes: ["shell"], no: [], excludeYes: [], excludeNo: ["shell"] },
+    { id: "q_spines", text: "Har djuret taggar eller piggar?", yes: ["spines"], no: [], excludeYes: [], excludeNo: ["spines"] },
+    { id: "q_legs4", text: "Har djuret fyra ben?", yes: ["legs4"], no: [], excludeYes: [], excludeNo: ["legs4"] },
+    { id: "q_legs0", text: "Saknar djuret ben helt?", yes: ["legs0"], no: [], excludeYes: [], excludeNo: ["legs0"] },
+    { id: "q_horns", text: "Har djuret horn?", yes: ["horns"], no: [], excludeYes: [], excludeNo: ["horns"] },
+    { id: "q_antlers", text: "Har djuret hornkrona/gevir?", yes: ["antlers"], no: [], excludeYes: [], excludeNo: ["antlers"] },
+    { id: "q_hooves", text: "Har djuret hovar?", yes: ["hooves"], no: [], excludeYes: [], excludeNo: ["hooves"] },
+    { id: "q_trunk", text: "Har djuret en snabel?", yes: ["trunk"], no: [], excludeYes: [], excludeNo: ["trunk"] },
+    { id: "q_tusks", text: "Har djuret betar?", yes: ["tusks"], no: [], excludeYes: [], excludeNo: ["tusks"] },
+    { id: "q_pouch", text: "Har djuret en pung (pungdjur)?", yes: ["pouch"], no: [], excludeYes: [], excludeNo: ["pouch"] },
+    { id: "q_stripes", text: "Har djuret ränder?", yes: ["stripes"], no: [], excludeYes: [], excludeNo: ["stripes"] },
+    { id: "q_spots", text: "Har djuret fläckar?", yes: ["spots"], no: [], excludeYes: [], excludeNo: ["spots"] },
+    { id: "q_longneck", text: "Har djuret en lång hals?", yes: ["longneck"], no: [], excludeYes: [], excludeNo: ["longneck"] },
+    { id: "q_longtail", text: "Har djuret en påfallande lång svans?", yes: ["longTail"], no: [], excludeYes: [], excludeNo: ["longTail"] },
+
+    // Behavior
+    { id: "q_predator", text: "Ar djuret ett rovdjur?", yes: ["predator"], no: [], excludeYes: [], excludeNo: ["predator"] },
+    { id: "q_herbivore", text: "Ar djuret en växtätare?", yes: ["herbivore"], no: [], excludeYes: [], excludeNo: ["herbivore"] },
+    { id: "q_fast", text: "Ar djuret snabbt?", yes: ["fast"], no: [], excludeYes: [], excludeNo: ["fast"] },
+    { id: "q_slow", text: "Ar djuret ovanligt långsamt?", yes: ["slow"], no: [], excludeYes: [], excludeNo: ["slow"] },
+    { id: "q_nocturnal", text: "Ar djuret nattaktivt?", yes: ["nocturnal"], no: [], excludeYes: [], excludeNo: ["nocturnal"] },
+    { id: "q_venomous", text: "Ar djuret giftigt?", yes: ["venomous"], no: [], excludeYes: [], excludeNo: ["venomous"] },
+    { id: "q_climbs", text: "Kan djuret klattra?", yes: ["climbs"], no: [], excludeYes: [], excludeNo: ["climbs"] },
+    { id: "q_jumps", text: "Ar djuret känt for att hoppa?", yes: ["jumps"], no: [], excludeYes: [], excludeNo: ["jumps"] },
+    { id: "q_social", text: "Lever djuret i grupp/flock?", yes: ["social"], no: [], excludeYes: [], excludeNo: ["social"] },
+    { id: "q_hibernate", text: "Går djuret i ide/vintervila?", yes: ["hibernate"], no: [], excludeYes: [], excludeNo: ["hibernate"] },
+    { id: "q_migration", text: "Flyttar djuret med årstiderna (migration)?", yes: ["migration"], no: [], excludeYes: [], excludeNo: ["migration"] },
+
+    // Geography
+    { id: "q_europe", text: "Kan djuret leva i Europa/Norden?", yes: ["europe"], no: [], excludeYes: [], excludeNo: ["europe"] },
+    { id: "q_africa", text: "Kan djuret leva i Afrika?", yes: ["africa"], no: [], excludeYes: [], excludeNo: ["africa"] },
+    { id: "q_asia", text: "Kan djuret leva i Asien?", yes: ["asia"], no: [], excludeYes: [], excludeNo: ["asia"] },
+    { id: "q_australia", text: "Lever djuret i Australien?", yes: ["australia"], no: [], excludeYes: [], excludeNo: ["australia"] },
+    { id: "q_arctic", text: "Lever djuret i Arktis/kalla omraden?", yes: ["arctic"], no: [], excludeYes: [], excludeNo: ["arctic"] },
+    { id: "q_southAmerica", text: "Lever djuret i Sydamerika?", yes: ["southAmerica"], no: [], excludeYes: [], excludeNo: ["southAmerica"] },
+    { id: "q_northAmerica", text: "Lever djuret i Nordamerika?", yes: ["northAmerica"], no: [], excludeYes: [], excludeNo: ["northAmerica"] },
+
+    // Special abilities
+    { id: "q_web", text: "Spinner djuret nät?", yes: ["makes_web"], no: [], excludeYes: [], excludeNo: ["makes_web"] },
+    { id: "q_color_change", text: "Kan djuret byta färg?", yes: ["changes_color"], no: [], excludeYes: [], excludeNo: ["changes_color"] },
+    { id: "q_echolocation", text: "Använder djuret ekolod/ekolokalisering?", yes: ["echolocation"], no: [], excludeYes: [], excludeNo: ["echolocation"] },
+    { id: "q_electric", text: "Kan djuret ge elektriska stötar?", yes: ["electric"], no: [], excludeYes: [], excludeNo: ["electric"] },
+    { id: "q_coldblood", text: "Ar djuret kallblodigt (beroende av omgivningens värme)?", yes: ["coldblood"], no: [], excludeYes: [], excludeNo: ["coldblood"] },
+    { id: "q_warmblood", text: "Ar djuret varmblodigt?", yes: ["warmblooded"], no: [], excludeYes: [], excludeNo: ["warmblooded"] },
+
+    // Leg count specifics
+    { id: "q_legs6", text: "Har djuret sex ben?", yes: ["legs6"], no: [], excludeYes: [], excludeNo: ["legs6"] },
+    { id: "q_legs8", text: "Har djuret åtta ben eller fler?", yes: ["legs8"], no: [], excludeYes: [], excludeNo: ["legs8"] },
+    { id: "q_legs2", text: "Har djuret tva ben?", yes: ["legs2"], no: [], excludeYes: [], excludeNo: ["legs2"] },
 ];
 
 // ═══════════════════════════════════════════════════════════════
 // GAME STATE
 // ═══════════════════════════════════════════════════════════════
 let candidates = [];
-let askedTraits = {};
+let askedQuestions = new Set();
+let knownYes = new Set();  // traits we know the animal HAS
+let knownNo = new Set();   // traits we know the animal DOES NOT have
 let questionNum = 0;
 let guessesUsed = 0;
 let totalQuestions = 0;
 const MAX_QUESTIONS = 30;
 const MAX_GUESSES = 3;
 let waitingForAnswer = false;
-let currentMode = "question"; // "question" or "guess-response"
+let currentMode = "question";
 let currentGuessAnimal = null;
+let currentQuestion = null;
 let gamesPlayed = 0;
 let gamesWon = 0;
+
+// ═══════════════════════════════════════════════════════════════
+// SCORING: how well does an animal match known traits?
+// ═══════════════════════════════════════════════════════════════
+function scoreAnimal(animal) {
+    let score = 0;
+    let mismatches = 0;
+    for (const trait of knownYes) {
+        if (animal.traits.has(trait)) score += 2;
+        else mismatches++;
+    }
+    for (const trait of knownNo) {
+        if (!animal.traits.has(trait)) score += 1;
+        else mismatches++;
+    }
+    return { score, mismatches };
+}
+
+function filterCandidates() {
+    // Keep animals with 0 mismatches; if none, keep those with fewest mismatches
+    let scored = candidates.map(a => ({ animal: a, ...scoreAnimal(a) }));
+    const minMismatch = Math.min(...scored.map(s => s.mismatches));
+    // Allow up to 1 mismatch tolerance (player might misremember a trait)
+    const tolerance = Math.min(1, minMismatch);
+    return scored
+        .filter(s => s.mismatches <= tolerance)
+        .sort((a, b) => b.score - a.score || a.mismatches - b.mismatches)
+        .map(s => s.animal);
+}
 
 // ═══════════════════════════════════════════════════════════════
 // UI HELPERS
@@ -592,29 +842,32 @@ function setButtonsEnabled(enabled) {
 // Pick the question that best splits remaining candidates 50/50
 // ═══════════════════════════════════════════════════════════════
 function pickBestQuestion() {
-    const available = allQuestions.filter(q => !(q.id in askedTraits));
+    const available = allQuestions.filter(q => !askedQuestions.has(q.id));
     if (available.length === 0) return null;
 
     let bestQ = null;
     let bestScore = Infinity;
 
     for (const q of available) {
+        // Count how many candidates have at least one of the "yes" traits
         let yesCount = 0;
+        const testTraits = q.yes;
         for (const a of candidates) {
-            if (a.traits[q.id]) yesCount++;
+            const hasAny = testTraits.some(t => a.traits.has(t));
+            if (hasAny) yesCount++;
         }
         const noCount = candidates.length - yesCount;
-        // Score: how far from a 50/50 split. Lower is better.
-        const score = Math.abs(yesCount - noCount);
-        // But skip questions that don't split at all
+        // Skip questions that don't split at all
         if (yesCount === 0 || noCount === 0) continue;
+        // Score: how far from a 50/50 split (lower is better)
+        const score = Math.abs(yesCount - noCount);
         if (score < bestScore) {
             bestScore = score;
             bestQ = q;
         }
     }
 
-    // If no splitting question found, pick first available
+    // If no splitting question, pick first available that at least has some signal
     if (!bestQ) {
         bestQ = available[0];
     }
@@ -624,11 +877,9 @@ function pickBestQuestion() {
 
 function shouldGuess() {
     if (guessesUsed >= MAX_GUESSES) return false;
-    if (candidates.length === 1) return true;
+    if (candidates.length <= 1) return true;
     if (candidates.length <= 2 && totalQuestions >= 3) return true;
-    // After many questions, if top candidate is very likely
     if (candidates.length <= 3 && totalQuestions >= 8) return true;
-    // Running low on questions
     if (totalQuestions >= MAX_QUESTIONS - 2 && guessesUsed < MAX_GUESSES) return true;
     return false;
 }
@@ -638,23 +889,25 @@ function shouldGuess() {
 // ═══════════════════════════════════════════════════════════════
 function startGame() {
     candidates = [...animalDB];
-    askedTraits = {};
+    askedQuestions = new Set();
+    knownYes = new Set();
+    knownNo = new Set();
     totalQuestions = 0;
     guessesUsed = 0;
     currentMode = "question";
     currentGuessAnimal = null;
+    currentQuestion = null;
 
     document.getElementById('startScreen').classList.add('hidden');
     document.getElementById('gameScreen').classList.remove('hidden');
     document.getElementById('chatArea').innerHTML = '';
     document.getElementById('resultOverlay').classList.remove('active');
 
-    // Reset pills
     document.querySelectorAll('.guess-pill').forEach(p => p.classList.remove('used'));
 
     updateStatus();
 
-    addBotMsg("Hej! Tank pa ett djur, vilket som helst. Jag staller fragor for att ta reda pa det!");
+    addBotMsg("Hej! Tank pa ett djur, vilket som helst! Jag staller fragor for att ta reda pa det. Jag känner till over 150 djur!");
 
     setTimeout(() => {
         askNextQuestion();
@@ -663,13 +916,11 @@ function startGame() {
 
 function askNextQuestion() {
     if (totalQuestions >= MAX_QUESTIONS && guessesUsed < MAX_GUESSES) {
-        // Out of questions, must guess
         makeGuess();
         return;
     }
 
     if (totalQuestions >= MAX_QUESTIONS && guessesUsed >= MAX_GUESSES) {
-        // Game over - bot lost
         botLoses();
         return;
     }
@@ -681,7 +932,6 @@ function askNextQuestion() {
 
     const q = pickBestQuestion();
     if (!q) {
-        // No more useful questions
         if (guessesUsed < MAX_GUESSES) {
             makeGuess();
         } else {
@@ -691,7 +941,7 @@ function askNextQuestion() {
     }
 
     currentMode = "question";
-    askedTraits[q.id] = null; // Mark as asked (value set on answer)
+    askedQuestions.add(q.id);
 
     const thinkDelay = 400 + Math.random() * 600;
     showThinking();
@@ -700,13 +950,10 @@ function askNextQuestion() {
         totalQuestions++;
         updateStatus();
         addBotMsg(`<strong>Fraga ${totalQuestions}:</strong> ${q.text}`);
-        // Store current question
         currentQuestion = q;
         setButtonsEnabled(true);
     }, thinkDelay);
 }
-
-let currentQuestion = null;
 
 function answer(yes) {
     if (!waitingForAnswer) return;
@@ -715,21 +962,31 @@ function answer(yes) {
     addPlayerMsg(yes ? "JA" : "NEJ");
 
     if (currentMode === "question" && currentQuestion) {
-        // Filter candidates based on answer
-        askedTraits[currentQuestion.id] = yes;
-        candidates = candidates.filter(a => a.traits[currentQuestion.id] === yes);
+        // Update known traits
+        if (yes) {
+            for (const t of currentQuestion.yes) knownYes.add(t);
+            for (const t of currentQuestion.excludeNo) knownNo.add(t);
+        } else {
+            for (const t of currentQuestion.yes) knownNo.add(t);
+        }
+
+        // Filter candidates with tolerance
+        candidates = filterCandidates();
 
         const leftText = candidates.length === 0
-            ? "Hmm, inget djur i min databas matchar alla svar..."
-            : `(${candidates.length} djur kvar att valja mellan)`;
+            ? "Hmm, det var ett ovanligt djur! Jag forsoker anda..."
+            : `(${candidates.length} möjliga djur kvar)`;
 
         setTimeout(() => {
             addBotMsg(`<em>${leftText}</em>`);
 
             if (candidates.length === 0) {
-                // Bot can't figure it out
-                setTimeout(() => botLoses(), 800);
-                return;
+                // Reset to full DB but with scoring
+                candidates = [...animalDB];
+                candidates = filterCandidates();
+                if (candidates.length === 0) {
+                    candidates = [...animalDB];
+                }
             }
 
             setTimeout(() => askNextQuestion(), 600);
@@ -737,10 +994,8 @@ function answer(yes) {
 
     } else if (currentMode === "guess-response") {
         if (yes) {
-            // Bot guessed correctly!
             botWins(currentGuessAnimal);
         } else {
-            // Wrong guess
             guessesUsed++;
             updateStatus();
 
@@ -770,7 +1025,7 @@ function makeGuess() {
     }
 
     currentMode = "guess-response";
-    currentGuessAnimal = candidates[0]; // Best remaining candidate
+    currentGuessAnimal = candidates[0];
 
     const thinkDelay = 600 + Math.random() * 800;
     showThinking();
