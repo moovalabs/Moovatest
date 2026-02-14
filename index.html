@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gissa Djuret! 🐾</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a472a 0%, #2d5a3f 50%, #1a472a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .game-container {
+            background: #f5e6c8;
+            border-radius: 24px;
+            padding: 32px;
+            max-width: 520px;
+            width: 95%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+            position: relative;
+            border: 3px solid #c9a96e;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d5a3f;
+            font-size: 2rem;
+            margin-bottom: 8px;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6b7c6b;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        /* Animal emoji that's hidden/revealed */
+        .animal-display {
+            text-align: center;
+            font-size: 5rem;
+            margin: 10px 0;
+            position: relative;
+            height: 90px;
+        }
+
+        .animal-emoji {
+            display: inline-block;
+            transition: transform 0.3s;
+        }
+
+        .animal-hidden {
+            filter: brightness(0);
+            opacity: 0.15;
+        }
+
+        .animal-revealed {
+            animation: revealBounce 0.8s ease;
+        }
+
+        @keyframes revealBounce {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.4); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+
+        /* Question counter */
+        .question-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 10px 16px;
+            background: #2d5a3f;
+            border-radius: 12px;
+            color: white;
+        }
+
+        .question-count {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .streak-display {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        /* Progress dots */
+        .progress-dots {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #d4c4a8;
+            border: 2px solid #b8a88c;
+            transition: all 0.3s;
+        }
+
+        .dot.used {
+            background: #e8a040;
+            border-color: #c98830;
+        }
+
+        .dot.bonus {
+            background: #ff6b6b;
+            border-color: #e05050;
+            animation: bonusPulse 1s ease infinite;
+        }
+
+        @keyframes bonusPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
+        /* Clue area */
+        .clue-area {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 1.1rem;
+            color: #333;
+            border: 2px solid #e0d5c0;
+            line-height: 1.5;
+        }
+
+        .clue-area .hint-label {
+            color: #2d5a3f;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Buttons */
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .btn {
+            padding: 14px 12px;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-yes {
+            background: #4CAF50;
+            color: white;
+            box-shadow: 0 4px 0 #388E3C;
+        }
+
+        .btn-yes:hover { background: #43A047; }
+        .btn-yes:active { box-shadow: 0 1px 0 #388E3C; transform: translateY(3px) scale(0.98); }
+
+        .btn-no {
+            background: #f44336;
+            color: white;
+            box-shadow: 0 4px 0 #c62828;
+        }
+
+        .btn-no:hover { background: #e53935; }
+        .btn-no:active { box-shadow: 0 1px 0 #c62828; transform: translateY(3px) scale(0.98); }
+
+        .btn-guess {
+            background: #FF9800;
+            color: white;
+            box-shadow: 0 4px 0 #e68900;
+            grid-column: 1 / -1;
+            font-size: 1.15rem;
+        }
+
+        .btn-guess:hover { background: #FB8C00; }
+        .btn-guess:active { box-shadow: 0 1px 0 #e68900; transform: translateY(3px) scale(0.98); }
+
+        .btn-start {
+            background: #2d5a3f;
+            color: white;
+            box-shadow: 0 4px 0 #1a3a28;
+            grid-column: 1 / -1;
+            font-size: 1.2rem;
+            padding: 18px;
+        }
+
+        .btn-start:hover { background: #3a7050; }
+
+        /* Guess input */
+        .guess-input-area {
+            display: none;
+            margin-bottom: 12px;
+        }
+
+        .guess-input-area.active {
+            display: block;
+        }
+
+        .guess-input-area input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 3px solid #2d5a3f;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            outline: none;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .guess-input-area input:focus {
+            border-color: #FF9800;
+        }
+
+        .guess-submit-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .guess-submit-row .btn {
+            flex: 1;
+        }
+
+        .btn-send-guess {
+            background: #FF9800;
+            color: white;
+            box-shadow: 0 4px 0 #e68900;
+        }
+
+        .btn-cancel-guess {
+            background: #999;
+            color: white;
+            box-shadow: 0 4px 0 #777;
+        }
+
+        /* History */
+        .history {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-bottom: 12px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            color: #555;
+            border-bottom: 1px solid #ece3d0;
+        }
+
+        .history-item .answer-yes { color: #4CAF50; font-weight: bold; }
+        .history-item .answer-no { color: #f44336; font-weight: bold; }
+
+        /* Bonus event overlay */
+        .bonus-overlay {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            border-radius: 24px;
+            z-index: 10;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .bonus-overlay.active {
+            display: flex;
+        }
+
+        .bonus-box {
+            background: linear-gradient(135deg, #FFD700, #FFA000);
+            border-radius: 20px;
+            padding: 32px 28px;
+            text-align: center;
+            max-width: 85%;
+            animation: bonusAppear 0.5s ease;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
+        }
+
+        @keyframes bonusAppear {
+            0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+            60% { transform: scale(1.1) rotate(2deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .bonus-box h2 {
+            font-size: 1.6rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .bonus-box p {
+            font-size: 1.05rem;
+            color: #555;
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        .bonus-box .bonus-clue {
+            background: white;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 1.15rem;
+            font-weight: bold;
+            color: #2d5a3f;
+            margin-bottom: 16px;
+            border: 2px dashed #c98830;
+        }
+
+        .btn-bonus {
+            background: #2d5a3f;
+            color: white;
+            box-shadow: 0 4px 0 #1a3a28;
+            padding: 14px 32px;
+            font-size: 1.1rem;
+        }
+
+        /* Win/lose screen */
+        .result-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .result-screen.active {
+            display: block;
+        }
+
+        .result-screen .big-emoji {
+            font-size: 6rem;
+            margin: 10px 0;
+        }
+
+        .result-screen h2 {
+            font-size: 1.8rem;
+            color: #2d5a3f;
+            margin-bottom: 8px;
+        }
+
+        .result-screen p {
+            font-size: 1.1rem;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .score-display {
+            background: #2d5a3f;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        /* Confetti */
+        .confetti-container {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            top: -10px;
+            animation: confettiFall linear forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Start screen */
+        .start-screen {
+            text-align: center;
+        }
+
+        .start-screen .big-animals {
+            font-size: 3rem;
+            margin: 16px 0;
+            line-height: 1.4;
+        }
+
+        .start-screen p {
+            color: #555;
+            font-size: 1.05rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .rules-box {
+            background: white;
+            border-radius: 14px;
+            padding: 16px;
+            text-align: left;
+            margin-bottom: 20px;
+            border: 2px solid #e0d5c0;
+        }
+
+        .rules-box h3 {
+            color: #2d5a3f;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .rules-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .rules-box ul li {
+            padding: 4px 0;
+            font-size: 0.95rem;
+            color: #444;
+        }
+
+        .rules-box ul li::before {
+            content: "-> ";
+            color: #2d5a3f;
+            font-weight: bold;
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <!-- START SCREEN -->
+    <div id="startScreen" class="start-screen">
+        <h1>Gissa Djuret!</h1>
+        <div class="big-animals">🦁 🐧 🐸 🦋</div>
+        <p>Jag tanker pa ett djur...<br>Kan du gissa vilket?</p>
+        <div class="rules-box">
+            <h3>Sa har spelar du:</h3>
+            <ul>
+                <li>Jag tanker pa ett djur</li>
+                <li>Du far stalla 20 ja/nej-fragor</li>
+                <li>Nar du tror du vet - gissa!</li>
+                <li>Halvvags in far du en BONUSLEDTRAD!</li>
+            </ul>
+        </div>
+        <div class="btn-grid">
+            <button class="btn btn-start" onclick="startGame()">Starta spelet!</button>
+        </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="gameScreen" class="hidden">
+        <h1>Gissa Djuret!</h1>
+        <div class="subtitle" id="difficultyLabel"></div>
+
+        <div class="animal-display">
+            <span class="animal-emoji animal-hidden" id="animalEmoji">?</span>
+        </div>
+
+        <div class="question-bar">
+            <span class="question-count">Fraga <span id="questionNum">1</span> av 20</span>
+            <span class="streak-display" id="streakDisplay"></span>
+        </div>
+
+        <div class="progress-dots" id="progressDots"></div>
+
+        <div class="clue-area" id="clueArea">
+            <div>
+                <span class="hint-label" id="hintLabel">Ledtrad</span>
+                <span id="clueText">Tryck JA eller NEJ for att svara pa din fraga!</span>
+            </div>
+        </div>
+
+        <div id="questionArea">
+            <div id="currentQuestion" style="text-align:center; margin-bottom:12px; font-size:1.05rem; color:#2d5a3f; font-weight:bold;"></div>
+
+            <div class="btn-grid" id="answerBtns">
+                <button class="btn btn-yes" onclick="askQuestion()">Nasta fraga</button>
+            </div>
+
+            <div class="btn-grid">
+                <button class="btn btn-guess" onclick="showGuessInput()">Jag vill gissa!</button>
+            </div>
+        </div>
+
+        <div class="guess-input-area" id="guessInputArea">
+            <input type="text" id="guessInput" placeholder="Skriv djurets namn..." autocomplete="off">
+            <div class="guess-submit-row">
+                <button class="btn btn-send-guess" onclick="submitGuess()">Gissa!</button>
+                <button class="btn btn-cancel-guess" onclick="cancelGuess()">Tillbaka</button>
+            </div>
+        </div>
+
+        <div class="history" id="history"></div>
+    </div>
+
+    <!-- RESULT SCREEN -->
+    <div id="resultScreen" class="result-screen">
+        <div class="big-emoji" id="resultEmoji"></div>
+        <h2 id="resultTitle"></h2>
+        <p id="resultText"></p>
+        <div class="score-display" id="scoreDisplay"></div>
+        <div class="btn-grid">
+            <button class="btn btn-start" onclick="startGame()">Spela igen!</button>
+        </div>
+    </div>
+
+    <!-- BONUS OVERLAY -->
+    <div class="bonus-overlay" id="bonusOverlay">
+        <div class="bonus-box">
+            <h2>BONUSRUNDA!</h2>
+            <p>Du har stallt 10 fragor! Har ar en extra ledtrad helt gratis:</p>
+            <div class="bonus-clue" id="bonusClueText"></div>
+            <button class="btn btn-bonus" onclick="closeBonusOverlay()">Tack! Jag fortsatter!</button>
+        </div>
+    </div>
+</div>
+
+<div class="confetti-container" id="confettiContainer"></div>
+
+<script>
+// ─── ANIMAL DATABASE ───
+const animals = [
+    {
+        name: "katt",
+        emoji: "🐱",
+        clues: [
+            "Det har djuret ar ett husdjur.",
+            "Det spinner nar det ar nojt.",
+            "Det har vassa klor.",
+            "Det gillar att jaga moss.",
+            "Det tvatter sig med tungan."
+        ],
+        bonusClue: "Det sager MJAU!",
+        traits: { husdjur: true, ben: 4, stort: false, flyger: false, simmar: false, farligt: false, palsi: true, svans: true, natt: true }
+    },
+    {
+        name: "hund",
+        emoji: "🐶",
+        clues: [
+            "Det har djuret ar manniskans basta van.",
+            "Det viftar pa svansen nar det ar glatt.",
+            "Det kan lara sig tricks.",
+            "Det tycker om att hamma pinnar.",
+            "Det skaller."
+        ],
+        bonusClue: "Det sager VOV VOV!",
+        traits: { husdjur: true, ben: 4, stort: false, flyger: false, simmar: true, farligt: false, palsi: true, svans: true, natt: false }
+    },
+    {
+        name: "elefant",
+        emoji: "🐘",
+        clues: [
+            "Det ar ett av varldens storsta djur.",
+            "Det bor i Afrika eller Asien.",
+            "Det har en lang snabel.",
+            "Det lever i flock.",
+            "Det har mycket bra minne."
+        ],
+        bonusClue: "Det har jattestora oron!",
+        traits: { husdjur: false, ben: 4, stort: true, flyger: false, simmar: true, farligt: true, palsi: true, svans: true, natt: false }
+    },
+    {
+        name: "pingvin",
+        emoji: "🐧",
+        clues: [
+            "Det ar en fagel som inte kan flyga.",
+            "Det bor dar det ar kallt.",
+            "Det ar svart och vitt.",
+            "Det ar en jattebra simmare.",
+            "Det gar lite lustigt, vaggande."
+        ],
+        bonusClue: "Det bor pa is och sno!",
+        traits: { husdjur: false, ben: 2, stort: false, flyger: false, simmar: true, farligt: false, palsi: true, svans: false, natt: false }
+    },
+    {
+        name: "orm",
+        emoji: "🐍",
+        clues: [
+            "Det har inga ben alls.",
+            "Det ar kallt om kroppen (kallblodigt).",
+            "Det kan hasta sig riktigt snabbt.",
+            "En del av dessa djur ar giftiga.",
+            "Det sticker ut tungan for att kanna lukter."
+        ],
+        bonusClue: "Det vassar! Ssssss...",
+        traits: { husdjur: false, ben: 0, stort: false, flyger: false, simmar: true, farligt: true, palsi: false, svans: false, natt: true }
+    },
+    {
+        name: "delfin",
+        emoji: "🐬",
+        clues: [
+            "Det bor i havet.",
+            "Det ar superviktigt och smart.",
+            "Det andas med lungor, inte galar.",
+            "Det hoppar over vattenytan.",
+            "Det lever i grupp."
+        ],
+        bonusClue: "Det pratar med klickljud och visslingar!",
+        traits: { husdjur: false, ben: 0, stort: false, flyger: false, simmar: true, farligt: false, palsi: true, svans: true, natt: false }
+    },
+    {
+        name: "uggla",
+        emoji: "🦉",
+        clues: [
+            "Det ar en fagel.",
+            "Det ar vaken pa natten.",
+            "Det kan vrida huvudet nastan helt runt.",
+            "Det jagar moss och sma djur.",
+            "Det har jattebra syn i morker."
+        ],
+        bonusClue: "Det sager HO-HOOO!",
+        traits: { husdjur: false, ben: 2, stort: false, flyger: true, simmar: false, farligt: false, palsi: true, svans: false, natt: true }
+    },
+    {
+        name: "groda",
+        emoji: "🐸",
+        clues: [
+            "Det bor bade pa land och i vatten.",
+            "Det borjar livet som en yngel med svans.",
+            "Det har langa, starka bakben.",
+            "Det fanger insekter med tungan.",
+            "Det kan hoppa jattelangt."
+        ],
+        bonusClue: "Det sager KVACK KVACK!",
+        traits: { husdjur: false, ben: 4, stort: false, flyger: false, simmar: true, farligt: false, palsi: false, svans: false, natt: true }
+    },
+    {
+        name: "lejon",
+        emoji: "🦁",
+        clues: [
+            "Det kallas djungelns kung.",
+            "Det bor i Afrika.",
+            "Hannen har en stor man.",
+            "Det ar ett kattdjur.",
+            "Det jagar i grupp."
+        ],
+        bonusClue: "Det RYTEEER hogt!",
+        traits: { husdjur: false, ben: 4, stort: true, flyger: false, simmar: false, farligt: true, palsi: true, svans: true, natt: true }
+    },
+    {
+        name: "kanin",
+        emoji: "🐰",
+        clues: [
+            "Det har langa oron.",
+            "Det hoppar istallet for att ga.",
+            "Det ater morotter och gras.",
+            "Det har mjuk, fluffig pals.",
+            "Det kan vara bade vilt och husdjur."
+        ],
+        bonusClue: "Det har en liten rund fluffig svans!",
+        traits: { husdjur: true, ben: 4, stort: false, flyger: false, simmar: false, farligt: false, palsi: true, svans: true, natt: true }
+    },
+    {
+        name: "papegoja",
+        emoji: "🦜",
+        clues: [
+            "Det ar en fagel med farglada fjadrar.",
+            "Det kan lara sig prata manniskosprak!",
+            "Det bor i tropiska skogar.",
+            "Det ater frukter och notter.",
+            "Det har en krokig nabb."
+        ],
+        bonusClue: "Det kan saga HALLAA!",
+        traits: { husdjur: true, ben: 2, stort: false, flyger: true, simmar: false, farligt: false, palsi: true, svans: true, natt: false }
+    },
+    {
+        name: "giraff",
+        emoji: "🦒",
+        clues: [
+            "Det ar varldens hogsta djur.",
+            "Det bor i Afrika.",
+            "Det ater lov fran tradtopparna.",
+            "Det har ett monster pa palsen.",
+            "Det har en lang, bla tunga."
+        ],
+        bonusClue: "Det har en JATTELANG hals!",
+        traits: { husdjur: false, ben: 4, stort: true, flyger: false, simmar: false, farligt: false, palsi: true, svans: true, natt: false }
+    },
+    {
+        name: "krokodil",
+        emoji: "🐊",
+        clues: [
+            "Det ar ett reptildjur.",
+            "Det bor i vatten och pa land.",
+            "Det har funnits sedan dinosauriernas tid.",
+            "Det har en laaang nos full med tander.",
+            "Det ligger stilla och vantar pa sitt byte."
+        ],
+        bonusClue: "KLAPP! Det smatter ihop kaftarna!",
+        traits: { husdjur: false, ben: 4, stort: true, flyger: false, simmar: true, farligt: true, palsi: false, svans: true, natt: true }
+    },
+    {
+        name: "fjäril",
+        emoji: "🦋",
+        clues: [
+            "Det kan flyga.",
+            "Det borjar livet som en larv.",
+            "Det har farglada vingar.",
+            "Det dricker nektar fran blommor.",
+            "Det genomgar en forvandling i en kokong."
+        ],
+        bonusClue: "Det var en LARV forst, sen blev det vackert!",
+        traits: { husdjur: false, ben: 6, stort: false, flyger: true, simmar: false, farligt: false, palsi: false, svans: false, natt: false }
+    },
+    {
+        name: "isbjorn",
+        emoji: "🐻‍❄️",
+        clues: [
+            "Det bor dar det ar riktigt kallt.",
+            "Det ar vitt i palsen.",
+            "Det ar en duktig simmare.",
+            "Det ater framst salar.",
+            "Det ar ett av varldens storsta rovdjur."
+        ],
+        bonusClue: "Det bor pa Nordpolen!",
+        traits: { husdjur: false, ben: 4, stort: true, flyger: false, simmar: true, farligt: true, palsi: true, svans: true, natt: false }
+    }
+];
+
+// ─── QUESTIONS the game asks (player answers yes/no) ───
+const questions = [
+    { text: "Ar djuret ett husdjur?", trait: "husdjur" },
+    { text: "Har djuret fyra ben?", trait: "ben", check: v => v === 4 },
+    { text: "Ar djuret stort (storre an en manniska)?", trait: "stort" },
+    { text: "Kan djuret flyga?", trait: "flyger" },
+    { text: "Kan djuret simma?", trait: "simmar" },
+    { text: "Ar djuret farligt for manniskor?", trait: "farligt" },
+    { text: "Har djuret pals eller fjadrar?", trait: "palsi" },
+    { text: "Har djuret en svans?", trait: "svans" },
+    { text: "Ar djuret aktivt pa natten?", trait: "natt" },
+    { text: "Har djuret ben?", trait: "ben", check: v => v > 0 },
+];
+
+// ─── GAME STATE ───
+let currentAnimal = null;
+let questionIndex = 0;
+let questionsUsed = 0;
+let maxQuestions = 20;
+let clueIndex = 0;
+let score = 0;
+let gamesWon = 0;
+let bonusShown = false;
+let askedQuestions = [];
+let remainingQuestions = [];
+let gameActive = false;
+
+function startGame() {
+    // Pick random animal
+    currentAnimal = animals[Math.floor(Math.random() * animals.length)];
+    questionIndex = 0;
+    questionsUsed = 0;
+    clueIndex = 0;
+    bonusShown = false;
+    askedQuestions = [];
+    gameActive = true;
+
+    // Shuffle questions
+    remainingQuestions = [...questions].sort(() => Math.random() - 0.5);
+
+    // Show game screen
+    document.getElementById('startScreen').classList.add('hidden');
+    document.getElementById('resultScreen').classList.remove('active');
+    document.getElementById('resultScreen').classList.add('hidden');
+    document.getElementById('gameScreen').classList.remove('hidden');
+
+    // Reset UI
+    document.getElementById('animalEmoji').textContent = '?';
+    document.getElementById('animalEmoji').className = 'animal-emoji animal-hidden';
+    document.getElementById('questionNum').textContent = '1';
+    document.getElementById('streakDisplay').textContent = gamesWon > 0 ? `Vinster: ${gamesWon}` : '';
+    document.getElementById('history').innerHTML = '';
+    document.getElementById('guessInputArea').classList.remove('active');
+
+    updateClue();
+    buildProgressDots();
+    showNextQuestion();
+}
+
+function buildProgressDots() {
+    const container = document.getElementById('progressDots');
+    container.innerHTML = '';
+    for (let i = 0; i < maxQuestions; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        if (i === 9) dot.id = 'bonusDot'; // question 10 = bonus
+        container.appendChild(dot);
+    }
+}
+
+function markDot(index) {
+    const dots = document.querySelectorAll('.dot');
+    if (dots[index]) {
+        dots[index].classList.add('used');
+    }
+}
+
+function updateClue() {
+    const label = document.getElementById('hintLabel');
+    const text = document.getElementById('clueText');
+
+    if (clueIndex < currentAnimal.clues.length) {
+        label.textContent = `Ledtrad ${clueIndex + 1}`;
+        text.textContent = currentAnimal.clues[clueIndex];
+    } else {
+        label.textContent = 'Ledtrad';
+        text.textContent = 'Inga fler ledtradar! Forsok gissa!';
+    }
+}
+
+function showNextQuestion() {
+    if (remainingQuestions.length === 0) {
+        // Recycle questions with different phrasing
+        remainingQuestions = [...questions].sort(() => Math.random() - 0.5);
+    }
+
+    const q = remainingQuestions[0];
+    document.getElementById('currentQuestion').textContent = q.text;
+
+    // Replace "Nasta fraga" button with Yes/No
+    document.getElementById('answerBtns').innerHTML = `
+        <button class="btn btn-yes" onclick="answerQuestion(true)">JA</button>
+        <button class="btn btn-no" onclick="answerQuestion(false)">NEJ</button>
+    `;
+}
+
+function answerQuestion(answer) {
+    if (!gameActive) return;
+
+    const q = remainingQuestions.shift();
+    questionsUsed++;
+
+    // Determine correct answer
+    let correctAnswer;
+    if (q.check) {
+        correctAnswer = q.check(currentAnimal.traits[q.trait]);
+    } else {
+        correctAnswer = currentAnimal.traits[q.trait];
+    }
+
+    const answerText = correctAnswer ? 'JA' : 'NEJ';
+
+    // Add to history
+    addToHistory(q.text, answerText);
+    askedQuestions.push({ question: q.text, answer: answerText });
+
+    // Update progress
+    markDot(questionsUsed - 1);
+    document.getElementById('questionNum').textContent = Math.min(questionsUsed + 1, maxQuestions);
+
+    // Every 4 questions, reveal a new clue
+    if (questionsUsed % 4 === 0 && clueIndex < currentAnimal.clues.length - 1) {
+        clueIndex++;
+        updateClue();
+    }
+
+    // BONUS at question 10!
+    if (questionsUsed === 10 && !bonusShown) {
+        showBonus();
+        return;
+    }
+
+    // Out of questions?
+    if (questionsUsed >= maxQuestions) {
+        endGame(false, null);
+        return;
+    }
+
+    showNextQuestion();
+}
+
+function showBonus() {
+    bonusShown = true;
+    const bonusDot = document.getElementById('bonusDot');
+    if (bonusDot) bonusDot.classList.add('bonus');
+
+    document.getElementById('bonusClueText').textContent = currentAnimal.bonusClue;
+    document.getElementById('bonusOverlay').classList.add('active');
+}
+
+function closeBonusOverlay() {
+    document.getElementById('bonusOverlay').classList.remove('active');
+    showNextQuestion();
+}
+
+function addToHistory(question, answer) {
+    const div = document.getElementById('history');
+    const item = document.createElement('div');
+    item.className = 'history-item';
+    const answerClass = answer === 'JA' ? 'answer-yes' : 'answer-no';
+    item.innerHTML = `<span>${question}</span><span class="${answerClass}">${answer}</span>`;
+    div.prepend(item);
+}
+
+function showGuessInput() {
+    document.getElementById('guessInputArea').classList.add('active');
+    document.getElementById('questionArea').classList.add('hidden');
+    document.getElementById('guessInput').value = '';
+    document.getElementById('guessInput').focus();
+}
+
+function cancelGuess() {
+    document.getElementById('guessInputArea').classList.remove('active');
+    document.getElementById('questionArea').classList.remove('hidden');
+}
+
+function submitGuess() {
+    const input = document.getElementById('guessInput').value.trim().toLowerCase();
+    if (!input) return;
+
+    const correct = input === currentAnimal.name.toLowerCase() ||
+                    input === currentAnimal.name.toLowerCase().replace('ä', 'a').replace('ö', 'o').replace('å', 'a');
+
+    endGame(correct, input);
+}
+
+function endGame(won, guess) {
+    gameActive = false;
+
+    document.getElementById('gameScreen').classList.add('hidden');
+    document.getElementById('resultScreen').classList.remove('hidden');
+    document.getElementById('resultScreen').classList.add('active');
+
+    const emoji = document.getElementById('resultEmoji');
+    const title = document.getElementById('resultTitle');
+    const text = document.getElementById('resultText');
+    const scoreDisp = document.getElementById('scoreDisplay');
+
+    if (won) {
+        gamesWon++;
+        const points = Math.max(100, 500 - (questionsUsed * 20));
+        score += points;
+
+        emoji.textContent = currentAnimal.emoji;
+        title.textContent = 'RATT! Du gissade ratt!';
+        text.textContent = `Det var en ${currentAnimal.name.toUpperCase()}! Du anvande ${questionsUsed} fragor. Fantastiskt!`;
+        scoreDisp.textContent = `+${points} poang! Totalt: ${score} poang | Vinster: ${gamesWon}`;
+
+        launchConfetti();
+    } else {
+        emoji.textContent = currentAnimal.emoji;
+        if (guess) {
+            title.textContent = 'Nara men inte ratt!';
+            text.textContent = `Du gissade "${guess}", men det var en ${currentAnimal.name.toUpperCase()}! Forsok igen!`;
+        } else {
+            title.textContent = 'Fragorna ar slut!';
+            text.textContent = `Det var en ${currentAnimal.name.toUpperCase()}! Bra forsok! Testa igen!`;
+        }
+        scoreDisp.textContent = `Poang: ${score} | Vinster: ${gamesWon}`;
+    }
+}
+
+function launchConfetti() {
+    const container = document.getElementById('confettiContainer');
+    const colors = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff6bff', '#ff9f43'];
+
+    for (let i = 0; i < 60; i++) {
+        setTimeout(() => {
+            const piece = document.createElement('div');
+            piece.className = 'confetti';
+            piece.style.left = Math.random() * 100 + 'vw';
+            piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+            piece.style.width = (Math.random() * 8 + 5) + 'px';
+            piece.style.height = (Math.random() * 8 + 5) + 'px';
+            piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+            piece.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
+            piece.style.animationDelay = '0s';
+            container.appendChild(piece);
+
+            setTimeout(() => piece.remove(), 4000);
+        }, i * 40);
+    }
+}
+
+// Enter key for guess input
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && document.getElementById('guessInputArea').classList.contains('active')) {
+        submitGuess();
+    }
+});
+</script>
+</body>
+</html>
