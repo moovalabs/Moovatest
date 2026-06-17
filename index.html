@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kvadratometer</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --gold: #E8A000;
+      --gold-dim: #6B4900;
+      --bg: #080808;
+      --surface: #111111;
+      --border: #1C1C1C;
+      --text-dim: #404040;
+      --text-muted: #2A2A2A;
+      --up: #3D9E5A;
+      --down: #C94444;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    /* ── LAYOUT ── */
+    #app {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 48px 24px 36px;
+    }
+
+    /* ── BRAND ── */
+    .brand {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.35em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+
+    /* ── PRICE SECTION ── */
+    .price-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .area-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      min-height: 16px;
+      transition: color 0.6s;
+    }
+
+    .price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .price-integer {
+      font-size: clamp(56px, 16vw, 84px);
+      font-weight: 100;
+      letter-spacing: -0.03em;
+      color: var(--gold);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      transition: color 0.3s;
+    }
+
+    .price-unit {
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--text-dim);
+      padding-bottom: 6px;
+    }
+
+    /* Digit roll animation */
+    @keyframes rollUp {
+      0%   { opacity: 1; transform: translateY(0); }
+      40%  { opacity: 0; transform: translateY(-16px); }
+      41%  { opacity: 0; transform: translateY(16px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes rollDown {
+      0%   { opacity: 1; transform: translateY(0); }
+      40%  { opacity: 0; transform: translateY(16px); }
+      41%  { opacity: 0; transform: translateY(-16px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .roll-up   { animation: rollUp   0.45s cubic-bezier(.4,0,.2,1); }
+    .roll-down { animation: rollDown 0.45s cubic-bezier(.4,0,.2,1); }
+
+    /* ── DELTA ROW ── */
+    .delta-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-dim);
+      min-height: 20px;
+      transition: color 0.3s;
+    }
+    .delta-row.up   { color: var(--up); }
+    .delta-row.down { color: var(--down); }
+
+    .delta-arrow {
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    /* ── COMPASS SECTION ── */
+    .compass-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .compass-hint {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.25em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+
+    .compass-wrap {
+      position: relative;
+      width: min(220px, 56vw);
+      height: min(220px, 56vw);
+    }
+
+    #compass-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .expensive-label {
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.18em;
+      color: var(--gold);
+      text-transform: uppercase;
+      min-height: 18px;
+      text-align: center;
+    }
+
+    /* ── STATUS ── */
+    .status-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 6px 16px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 9px;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+    }
+
+    /* ── LOADING OVERLAY ── */
+    #loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      z-index: 10;
+      transition: opacity 0.5s;
+    }
+    #loading-overlay.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #loading-overlay.hidden { display: none; }
+
+    .loader-ring {
+      width: 40px;
+      height: 40px;
+      border: 1.5px solid var(--border);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loader-text {
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      color: var(--text-dim);
+    }
+
+    #ios-prompt {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    #ios-prompt button {
+      background: none;
+      border: 1px solid var(--gold-dim);
+      color: var(--gold);
+      padding: 10px 28px;
+      font-size: 13px;
+      letter-spacing: 0.1em;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+
+    /* ── DEMO BADGE ── */
+    .demo-badge {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      font-size: 8px;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      border: 1px solid var(--text-muted);
+      padding: 2px 5px;
+      border-radius: 2px;
+      display: none;
+    }
+    .demo-badge.visible { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div id="loading-overlay">
+  <div id="default-loader">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:20px">
+      <div class="loader-ring"></div>
+      <div class="loader-text">Hämtar position…</div>
+    </div>
+  </div>
+  <div id="ios-prompt">
+    <div class="loader-text">Kräver tillgång till plats & kompass</div>
+    <button id="ios-start-btn">Aktivera →</button>
+  </div>
+</div>
+
+<div class="demo-badge" id="demo-badge">Demo – Stockholm</div>
+
+<!-- MAIN APP -->
+<div id="app">
+
+  <div class="brand">Kvadratometer</div>
+
+  <div class="price-section">
+    <div class="area-label" id="area-label">–</div>
+    <div class="price-row">
+      <div class="price-integer" id="price-el">–</div>
+      <div class="price-unit">kr/m²</div>
+    </div>
+    <div class="delta-row" id="delta-row">
+      <span class="delta-arrow" id="delta-arrow">→</span>
+      <span id="delta-text">–</span>
+    </div>
+  </div>
+
+  <div class="compass-section">
+    <div class="compass-hint">Dyrare åt</div>
+    <div class="compass-wrap">
+      <svg id="compass-svg" viewBox="0 0 200 200">
+        <defs>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="needle-glow">
+            <feGaussianBlur stdDeviation="2.5" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <!-- Outer track ring -->
+        <circle cx="100" cy="100" r="92" fill="none" stroke="#151515" stroke-width="1"/>
+
+        <!-- Price intensity arcs (filled dynamically) -->
+        <g id="price-arcs"></g>
+
+        <!-- Degree ticks -->
+        <g id="ticks"></g>
+
+        <!-- Cardinal labels -->
+        <text x="100" y="15"  text-anchor="middle" dominant-baseline="middle" fill="#2E2E2E" font-size="10" font-weight="500" letter-spacing="0.05em">N</text>
+        <text x="185" y="100" text-anchor="middle" dominant-baseline="middle" fill="#2E2E2E" font-size="10" font-weight="500">Ö</text>
+        <text x="100" y="186" text-anchor="middle" dominant-baseline="middle" fill="#2E2E2E" font-size="10" font-weight="500">S</text>
+        <text x="15"  y="100" text-anchor="middle" dominant-baseline="middle" fill="#2E2E2E" font-size="10" font-weight="500">V</text>
+
+        <!-- Inner circle background -->
+        <circle cx="100" cy="100" r="68" fill="#0A0A0A" stroke="#161616" stroke-width="1"/>
+
+        <!-- Needle group — rotates around center -->
+        <g id="needle" transform="rotate(0,100,100)">
+          <!-- South (cheap) tail -->
+          <polygon points="100,168  94,100  106,100" fill="#1A1A1A"/>
+          <!-- North (expensive) head -->
+          <polygon points="100,32  94,100  106,100" fill="#E8A000" filter="url(#needle-glow)"/>
+        </g>
+
+        <!-- Center cap -->
+        <circle cx="100" cy="100" r="7" fill="#0A0A0A" stroke="#222" stroke-width="1.5"/>
+        <circle cx="100" cy="100" r="3" fill="#E8A000"/>
+      </svg>
+    </div>
+    <div class="expensive-label" id="expensive-label">–</div>
+  </div>
+
+</div>
+
+<div class="status-bar">
+  <span id="coord-status">–</span>
+  <span id="accuracy-status">–</span>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  PRICE ENGINE  — simulated Swedish real estate market
+// ═══════════════════════════════════════════════════════════
+
+const HOTSPOTS = [
+  // Inner Stockholm
+  { name: 'Östermalm',     lat: 59.337, lng: 18.082, p: 148000, r: 0.017 },
+  { name: 'Vasastan',      lat: 59.346, lng: 18.057, p: 118000, r: 0.014 },
+  { name: 'Södermalm',     lat: 59.316, lng: 18.073, p: 112000, r: 0.017 },
+  { name: 'Kungsholmen',   lat: 59.332, lng: 18.028, p: 106000, r: 0.015 },
+  { name: 'Norrmalm',      lat: 59.336, lng: 18.062, p: 105000, r: 0.012 },
+  { name: 'Djurgården',    lat: 59.326, lng: 18.118, p:  92000, r: 0.012 },
+  // Greater Stockholm
+  { name: 'Lidingö',       lat: 59.363, lng: 18.148, p:  82000, r: 0.020 },
+  { name: 'Danderyd',      lat: 59.398, lng: 18.043, p:  72000, r: 0.018 },
+  { name: 'Solna',         lat: 59.363, lng: 18.000, p:  68000, r: 0.018 },
+  { name: 'Nacka',         lat: 59.310, lng: 18.162, p:  64000, r: 0.022 },
+  { name: 'Bromma',        lat: 59.340, lng: 17.940, p:  63000, r: 0.020 },
+  { name: 'Täby',          lat: 59.445, lng: 18.072, p:  50000, r: 0.022 },
+  { name: 'Huddinge',      lat: 59.237, lng: 17.980, p:  38000, r: 0.022 },
+  // Göteborg
+  { name: 'Linnéstan',     lat: 57.697, lng: 11.953, p:  62000, r: 0.015 },
+  { name: 'Centrum Gbg',   lat: 57.706, lng: 11.967, p:  60000, r: 0.016 },
+  { name: 'Majorna',       lat: 57.692, lng: 11.926, p:  54000, r: 0.013 },
+  { name: 'Hisingen',      lat: 57.730, lng: 11.960, p:  36000, r: 0.022 },
+  // Malmö
+  { name: 'Limhamn',       lat: 55.581, lng: 12.952, p:  48000, r: 0.014 },
+  { name: 'Malmö centrum', lat: 55.605, lng: 13.000, p:  46000, r: 0.018 },
+  // Other cities
+  { name: 'Uppsala',       lat: 59.858, lng: 17.645, p:  38000, r: 0.018 },
+  { name: 'Västerås',      lat: 59.611, lng: 16.544, p:  22000, r: 0.016 },
+  { name: 'Linköping',     lat: 58.411, lng: 15.621, p:  24000, r: 0.016 },
+  { name: 'Örebro',        lat: 59.274, lng: 15.213, p:  20000, r: 0.016 },
+  { name: 'Helsingborg',   lat: 56.046, lng: 12.694, p:  28000, r: 0.016 },
+];
+
+// Smooth value noise (pseudo-Perlin via sin hash)
+function _hash(x, y) {
+  const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453123;
+  return s - Math.floor(s);
+}
+function _vnoise(x, y) {
+  const ix = Math.floor(x), iy = Math.floor(y);
+  const fx = x - ix, fy = y - iy;
+  const ux = fx * fx * (3 - 2 * fx);
+  const uy = fy * fy * (3 - 2 * fy);
+  const a = _hash(ix,   iy),   b = _hash(ix+1, iy);
+  const c = _hash(ix,   iy+1), d = _hash(ix+1, iy+1);
+  return a + (b-a)*ux + (c-a)*uy + (a-b-c+d)*ux*uy;
+}
+function _fbm(x, y) {
+  let v = 0, amp = 0.5;
+  for (let i = 0; i < 5; i++) {
+    v += amp * _vnoise(x, y);
+    x *= 2.07; y *= 2.07; amp *= 0.49;
+  }
+  return v; // ≈ 0–1
+}
+
+function priceAt(lat, lng) {
+  let base = 5500; // rural floor
+  for (const h of HOTSPOTS) {
+    const d2 = (lat - h.lat)**2 + (lng - h.lng)**2;
+    const influence = h.p * Math.exp(-d2 / (2 * h.r * h.r));
+    if (influence > base) base = influence;
+  }
+  const noise = _fbm(lat * 160 + 0.5, lng * 160 + 0.5);
+  return Math.round(base * (0.80 + 0.40 * noise) / 500) * 500;
+}
+
+function areaName(lat, lng) {
+  let best = null, bestScore = -Infinity;
+  for (const h of HOTSPOTS) {
+    const d = Math.sqrt((lat - h.lat)**2 + (lng - h.lng)**2);
+    const score = h.p * Math.exp(-d*d / (2 * h.r * h.r));
+    if (score > bestScore) { bestScore = score; best = { h, d }; }
+  }
+  if (!best) return '';
+  const { h, d } = best;
+  if (d < h.r * 0.8) return h.name;
+  if (d < h.r * 2.0) return 'Nära ' + h.name;
+  if (d < h.r * 4.0) return 'Utanför ' + h.name;
+  return '';
+}
+
+// Offset a lat/lng by bearing (deg CW from N) and distance (km)
+function offsetPos(lat, lng, bearing, km) {
+  const R = 6371, d = km / R;
+  const φ1 = lat * Math.PI / 180;
+  const λ1 = lng * Math.PI / 180;
+  const θ  = bearing * Math.PI / 180;
+  const φ2 = Math.asin(Math.sin(φ1)*Math.cos(d) + Math.cos(φ1)*Math.sin(d)*Math.cos(θ));
+  const λ2 = λ1 + Math.atan2(Math.sin(θ)*Math.sin(d)*Math.cos(φ1), Math.cos(d)-Math.sin(φ1)*Math.sin(φ2));
+  return { lat: φ2 * 180 / Math.PI, lng: λ2 * 180 / Math.PI };
+}
+
+// Sample 8 directions, return prices & most expensive bearing
+function scanDirections(lat, lng) {
+  const DIRS = [0, 45, 90, 135, 180, 225, 270, 315];
+  const NAMES = ['N','NÖ','Ö','SÖ','S','SV','V','NV'];
+  const SAMPLE_KM = [0.15, 0.30, 0.55];
+
+  let maxP = -1, maxBearing = 0, maxName = 'N';
+  const results = [];
+
+  for (let i = 0; i < 8; i++) {
+    let avg = 0;
+    for (const km of SAMPLE_KM) {
+      const pt = offsetPos(lat, lng, DIRS[i], km);
+      avg += priceAt(pt.lat, pt.lng);
+    }
+    avg /= SAMPLE_KM.length;
+    results.push({ bearing: DIRS[i], name: NAMES[i], price: avg });
+    if (avg > maxP) { maxP = avg; maxBearing = DIRS[i]; maxName = NAMES[i]; }
+  }
+
+  return { bearing: maxBearing, name: maxName, dirPrices: results };
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SVG SETUP
+// ═══════════════════════════════════════════════════════════
+
+function buildTicks() {
+  const g = document.getElementById('ticks');
+  for (let deg = 0; deg < 360; deg += 5) {
+    const rad = (deg - 90) * Math.PI / 180;
+    const major = deg % 45 === 0;
+    const r1 = major ? 80 : 85, r2 = 92;
+    const x1 = 100 + r1 * Math.cos(rad), y1 = 100 + r1 * Math.sin(rad);
+    const x2 = 100 + r2 * Math.cos(rad), y2 = 100 + r2 * Math.sin(rad);
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+    line.setAttribute('stroke', major ? '#282828' : '#181818');
+    line.setAttribute('stroke-width', major ? '1.5' : '0.8');
+    g.appendChild(line);
+  }
+}
+
+function drawPriceArcs(dirPrices) {
+  const g = document.getElementById('price-arcs');
+  g.innerHTML = '';
+  const prices = dirPrices.map(d => d.price);
+  const minP = Math.min(...prices), maxP = Math.max(...prices);
+  const range = maxP - minP || 1;
+  const R_IN = 68, R_OUT = 80;
+
+  for (const { bearing, price } of dirPrices) {
+    const intensity = (price - minP) / range;
+    if (intensity < 0.05) continue;
+    const startRad = (bearing - 22.5 - 90) * Math.PI / 180;
+    const endRad   = (bearing + 22.5 - 90) * Math.PI / 180;
+    const x1 = 100 + R_IN  * Math.cos(startRad), y1 = 100 + R_IN  * Math.sin(startRad);
+    const x2 = 100 + R_IN  * Math.cos(endRad),   y2 = 100 + R_IN  * Math.sin(endRad);
+    const x3 = 100 + R_OUT * Math.cos(endRad),   y3 = 100 + R_OUT * Math.sin(endRad);
+    const x4 = 100 + R_OUT * Math.cos(startRad), y4 = 100 + R_OUT * Math.sin(startRad);
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d',
+      `M${x1},${y1} A${R_IN},${R_IN} 0 0,1 ${x2},${y2} L${x3},${y3} A${R_OUT},${R_OUT} 0 0,0 ${x4},${y4}Z`
+    );
+    path.setAttribute('fill', '#E8A000');
+    path.setAttribute('opacity', (0.06 + intensity * 0.38).toFixed(3));
+    g.appendChild(path);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  PRICE ANIMATION
+// ═══════════════════════════════════════════════════════════
+
+let _displayPrice = 0;
+
+function animateToPrice(target, dir) {
+  const priceEl = document.getElementById('price-el');
+  const from = _displayPrice;
+  const duration = 550;
+  const start = performance.now();
+
+  if (dir !== 0 && from !== 0) {
+    priceEl.classList.remove('roll-up', 'roll-down');
+    void priceEl.offsetWidth; // reflow
+    priceEl.classList.add(dir > 0 ? 'roll-up' : 'roll-down');
+  }
+
+  function step(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - t, 3);
+    _displayPrice = Math.round(from + (target - from) * ease);
+    priceEl.textContent = _displayPrice.toLocaleString('sv-SE');
+    if (t < 1) requestAnimationFrame(step);
+    else _displayPrice = target;
+  }
+  requestAnimationFrame(step);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  NEEDLE ANIMATION
+// ═══════════════════════════════════════════════════════════
+
+let _needleAngle = 0;    // current displayed needle angle (absolute bearing from N)
+let _targetBearing = 0;  // where needle wants to point (bearing from N to expensive)
+let _deviceHeading = 0;  // device compass heading (where phone top points, degrees from N)
+
+function compassLoop() {
+  // Shortest-path interpolation toward target
+  let diff = _targetBearing - _needleAngle;
+  while (diff >  180) diff -= 360;
+  while (diff < -180) diff += 360;
+  _needleAngle += diff * 0.07;
+
+  // Rotate needle: compensate for device rotation so the compass "works"
+  const svgAngle = _needleAngle - _deviceHeading;
+  document.getElementById('needle').setAttribute('transform', `rotate(${svgAngle},100,100)`);
+  requestAnimationFrame(compassLoop);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  STATE UPDATE
+// ═══════════════════════════════════════════════════════════
+
+let _currentPrice = 0;
+let _locationKnown = false;
+
+function updateFromPosition(lat, lng) {
+  const newPrice = priceAt(lat, lng);
+  const dir = newPrice - _currentPrice;
+
+  // Price display
+  animateToPrice(newPrice, dir);
+
+  // Delta indicator
+  const deltaRow = document.getElementById('delta-row');
+  const deltaArrow = document.getElementById('delta-arrow');
+  const deltaText = document.getElementById('delta-text');
+  const absDiff = Math.abs(newPrice - _currentPrice);
+
+  if (_currentPrice > 0 && absDiff > 800) {
+    if (dir > 0) {
+      deltaRow.className = 'delta-row up';
+      deltaArrow.textContent = '↑';
+      deltaText.textContent = '+' + absDiff.toLocaleString('sv-SE') + ' kr/m²';
+    } else {
+      deltaRow.className = 'delta-row down';
+      deltaArrow.textContent = '↓';
+      deltaText.textContent = '−' + absDiff.toLocaleString('sv-SE') + ' kr/m²';
+    }
+  } else if (_currentPrice > 0) {
+    deltaRow.className = 'delta-row';
+    deltaArrow.textContent = '→';
+    deltaText.textContent = 'Stabilt';
+  } else {
+    deltaRow.className = 'delta-row';
+    deltaArrow.textContent = '';
+    deltaText.textContent = '';
+  }
+
+  _currentPrice = newPrice;
+
+  // Area name
+  document.getElementById('area-label').textContent = areaName(lat, lng).toUpperCase();
+
+  // Compass direction
+  const { bearing, name, dirPrices } = scanDirections(lat, lng);
+  _targetBearing = bearing;
+  document.getElementById('expensive-label').textContent = name;
+  drawPriceArcs(dirPrices);
+}
+
+// Heartbeat micro-variation (makes it feel live)
+let _heartbeatBase = 0;
+function startHeartbeat() {
+  setInterval(() => {
+    if (!_locationKnown || _currentPrice <= 0) return;
+    const jitter = (Math.random() - 0.5) * _currentPrice * 0.012;
+    const jittered = Math.round((_currentPrice + jitter) / 500) * 500;
+    if (jittered !== _displayPrice) animateToPrice(jittered, jitter);
+  }, 2800);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  GEOLOCATION
+// ═══════════════════════════════════════════════════════════
+
+function showApp() {
+  const overlay = document.getElementById('loading-overlay');
+  overlay.classList.add('fade-out');
+  setTimeout(() => overlay.classList.add('hidden'), 600);
+}
+
+function onPosition(pos) {
+  const { latitude: lat, longitude: lng, accuracy } = pos.coords;
+  if (!_locationKnown) { showApp(); _locationKnown = true; }
+  updateFromPosition(lat, lng);
+  document.getElementById('coord-status').textContent =
+    `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  document.getElementById('accuracy-status').textContent =
+    `±${Math.round(accuracy)} m`;
+}
+
+function onGeoError(err) {
+  // Fall back to demo mode
+  startDemoMode();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DEMO MODE (desktop / no GPS)
+// ═══════════════════════════════════════════════════════════
+
+// Walk path through Stockholm neighbourhoods
+const DEMO_PATH = [
+  { lat: 59.337, lng: 18.082 }, // Östermalm
+  { lat: 59.341, lng: 18.070 }, // Vasastan
+  { lat: 59.346, lng: 18.057 }, // Vasastan nord
+  { lat: 59.338, lng: 18.043 }, // Kungsholmen
+  { lat: 59.330, lng: 18.035 }, // Kungsholmen syd
+  { lat: 59.321, lng: 18.048 }, // Söder norr
+  { lat: 59.315, lng: 18.063 }, // Södermalm
+  { lat: 59.310, lng: 18.075 }, // Söder öst
+  { lat: 59.316, lng: 18.090 }, // Nacka-hållet
+  { lat: 59.326, lng: 18.095 }, // Tillbaka
+  { lat: 59.334, lng: 18.082 }, // Östermalm igen
+];
+let _demoIdx = 0, _demoT = 0;
+
+function demoStep() {
+  const a = DEMO_PATH[_demoIdx % DEMO_PATH.length];
+  const b = DEMO_PATH[(_demoIdx + 1) % DEMO_PATH.length];
+  _demoT += 0.04;
+  if (_demoT >= 1) { _demoT = 0; _demoIdx = (_demoIdx + 1) % DEMO_PATH.length; }
+  const lat = a.lat + (b.lat - a.lat) * _demoT;
+  const lng = a.lng + (b.lng - a.lng) * _demoT;
+  // Tiny jitter for "walking" feel
+  const jlat = lat + (Math.random() - 0.5) * 0.0003;
+  const jlng = lng + (Math.random() - 0.5) * 0.0004;
+
+  if (!_locationKnown) { showApp(); _locationKnown = true; }
+  updateFromPosition(jlat, jlng);
+
+  // Slowly rotate device heading for compass effect
+  _deviceHeading = (_deviceHeading + 0.4) % 360;
+
+  document.getElementById('coord-status').textContent =
+    `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  document.getElementById('accuracy-status').textContent = 'Demo';
+}
+
+function startDemoMode() {
+  document.getElementById('demo-badge').classList.add('visible');
+  setInterval(demoStep, 1800);
+  demoStep();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ORIENTATION (real compass)
+// ═══════════════════════════════════════════════════════════
+
+function startOrientation() {
+  const handler = (e) => {
+    if (e.webkitCompassHeading !== undefined) {
+      _deviceHeading = e.webkitCompassHeading; // iOS
+    } else if (e.absolute && e.alpha !== null) {
+      _deviceHeading = 360 - e.alpha;
+    }
+  };
+  window.addEventListener('deviceorientationabsolute', handler, true);
+  window.addEventListener('deviceorientation', handler, true);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  iOS PERMISSION FLOW
+// ═══════════════════════════════════════════════════════════
+
+function requestIOSPermissions() {
+  const promises = [];
+  if (typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function') {
+    promises.push(DeviceOrientationEvent.requestPermission());
+  }
+  return Promise.all(promises);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════════════════
+
+function startGPS() {
+  if ('geolocation' in navigator) {
+    navigator.geolocation.watchPosition(onPosition, onGeoError, {
+      enableHighAccuracy: true,
+      maximumAge: 4000,
+      timeout: 10000,
+    });
+    // Fallback if no fix in 8 s
+    setTimeout(() => { if (!_locationKnown) startDemoMode(); }, 8000);
+  } else {
+    startDemoMode();
+  }
+}
+
+function boot() {
+  buildTicks();
+  startOrientation();
+  compassLoop();
+  startHeartbeat();
+
+  // iOS 13+ needs user gesture for DeviceOrientationEvent
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  if (isIOS && typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function') {
+    document.getElementById('default-loader').style.display = 'none';
+    document.getElementById('ios-prompt').style.display = 'flex';
+    document.getElementById('ios-start-btn').addEventListener('click', () => {
+      requestIOSPermissions().then(() => {
+        document.getElementById('ios-prompt').style.display = 'none';
+        document.getElementById('default-loader').style.display = 'flex';
+        startGPS();
+      }).catch(() => startGPS());
+    });
+  } else {
+    startGPS();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', boot);
+</script>
+</body>
+</html>
